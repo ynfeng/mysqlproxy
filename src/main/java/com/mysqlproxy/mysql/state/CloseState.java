@@ -6,12 +6,12 @@ import com.mysqlproxy.mysql.protocol.MysqlPacket;
 /**
  * Created by ynfeng on 2017/5/12.
  */
-public class CloseState implements MysqlConnectionState<MysqlPacket> {
+public class CloseState implements MysqlConnectionState {
     public static final CloseState INSTANCE = new CloseState();
 
 
     @Override
-    public void backendHandle(MysqlConnection connection, MysqlPacket packet) {
+    public void backendHandle(MysqlConnection connection, Object object) {
         MysqlConnection mysqlConnection = (MysqlConnection) connection;
         mysqlConnection.close();
         mysqlConnection.setState(FinalState.INSTANCE);
@@ -19,7 +19,7 @@ public class CloseState implements MysqlConnectionState<MysqlPacket> {
     }
 
     @Override
-    public void frontendHandle(MysqlConnection connection, MysqlPacket o) {
+    public void frontendHandle(MysqlConnection connection, Object object) {
 
     }
 }
