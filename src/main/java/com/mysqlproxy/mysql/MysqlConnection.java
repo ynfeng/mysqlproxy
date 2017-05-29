@@ -94,6 +94,10 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
         return myByteBuff.transferToChannel(getSocketChannel());
     }
 
+    public void enableRead(){
+        getSelectionKey().interestOps(getSelectionKey().interestOps() | SelectionKey.OP_WRITE);
+    }
+
     public void disableRead() {
         getSelectionKey().interestOps(getSelectionKey().interestOps() & ~SelectionKey.OP_READ);
     }

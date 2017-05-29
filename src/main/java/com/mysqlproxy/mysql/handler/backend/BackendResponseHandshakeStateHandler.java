@@ -26,7 +26,7 @@ public class BackendResponseHandshakeStateHandler implements StateHandler<Initia
                 mysqlConnection.disableWriteAndEnableRead();
                 mysqlConnection.setState(AuthenticatingState.INSTANCE);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             mysqlConnection.setState(CloseState.INSTANCE);
             mysqlConnection.drive(null);

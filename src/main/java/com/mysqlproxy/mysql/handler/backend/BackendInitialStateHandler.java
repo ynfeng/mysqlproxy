@@ -41,7 +41,7 @@ public class BackendInitialStateHandler implements StateHandler {
                 mysqlConnection.setState(CloseState.INSTANCE);
                 mysqlConnection.drive(null);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             mysqlConnection.setState(CloseState.INSTANCE);
             mysqlConnection.drive(null);
         }

@@ -2,7 +2,7 @@ package com.mysqlproxy.mysql.state;
 
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.handler.backend.BackendInitialStateHandler;
-import com.mysqlproxy.mysql.handler.frontend.FrontInitialStateHandler;
+import com.mysqlproxy.mysql.handler.frontend.FrontendInitialStateHandler;
 
 /**
  * Created by ynfeng on 2017/5/11.
@@ -18,6 +18,6 @@ public class InitialState implements MysqlConnectionState {
 
     @Override
     public void frontendHandle(MysqlConnection connection, Object o) {
-        FrontInitialStateHandler.INSTANCE.handle(connection, o);
+        FrontendInitialStateHandler.INSTANCE.handle(connection, o);
     }
 }

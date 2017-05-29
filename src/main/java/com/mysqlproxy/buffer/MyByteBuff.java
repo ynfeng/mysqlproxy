@@ -207,19 +207,50 @@ public final class MyByteBuff {
         this.writeInt(0, 1);
     }
 
-    public void writeLenenc(byte[] bytes) {
-        //TODO 未实现完全
-        /**
-         * If it is < 0xfb, treat it as a 1-byte integer.
-         * If it is 0xfc, it is followed by a 2-byte integer. If it is 0xfd, it is followed by a 3-byte integer.
-         * If it is 0xfe, it is followed by a 8-byte integer.
-         */
-        this.writeInt(bytes.length, 1);
+    public long readLenenc() {
+        int lenenc = (int) this.getFixLenthInteger(readIndex, 1);
+        if (lenenc < 0xFB) {
+            return this.readFixLengthInteger(1);
+        } else if (lenenc == 0xFC) {
+            return this.readFixLengthInteger(2);
+        } else if (lenenc == 0xFE) {
+            return this.readFixLengthInteger(3);
+        } else {
+            return this.readFixLengthInteger(4);
+        }
+    }
+
+    public void writeLenecInt(long val, int len) {
+        if (len < 0xFB) {
+            this.writeInt(val, 1);
+        } else if (len == 2) {
+            this.writeInt(0xFC, 1);
+            this.writeInt(val, 2);
+        } else if (len == 3) {
+            this.writeInt(0xFE, 1);
+            this.writeInt(val, 3);
+        } else {
+            this.writeInt(0xFD, 1);
+            this.writeInt(val, 8);
+        }
+    }
+
+    public void writeLenencBytes(byte[] bytes) {
+        int lenenc = bytes.length;
+        if (lenenc < 0xFB) {
+            this.writeInt(lenenc, 1);
+        } else if (lenenc == 0xFC) {
+            this.writeInt(lenenc, 2);
+        } else if (lenenc == 0xFE) {
+            this.writeInt(lenenc, 3);
+        } else {
+            this.writeInt(lenenc, 4);
+        }
         this.writeBytes(bytes, writeIndex);
     }
 
     public void writeBytes(byte[] bytes) {
-       writeBytes(bytes,writeIndex);
+        writeBytes(bytes, writeIndex);
     }
 
     private void writeBytes(byte[] bytes, int startPos) {
@@ -293,12 +324,23 @@ public final class MyByteBuff {
         return str;
     }
 
+    public byte[] readBytes(int len) {
+        byte[] bytes = getBytes(readIndex, len);
+        readIndex += bytes.length;
+        readBufferArrayIndex = getByteBufferArrayIndex(readIndex);
+        return bytes;
+    }
+
     public String getEOFString(int startPos) {
         int stringLen = writeIndex - startPos;
         return getString(startPos, stringLen);
     }
 
     private String getString(int startPos, int len) {
+        return new String(getBytes(startPos, len));
+    }
+
+    private byte[] getBytes(int startPos, int len) {
         checkBounds(len);
         int index = getByteBufferArrayIndex(startPos);
         int offset = getByteBufferOffset(startPos);
@@ -312,7 +354,7 @@ public final class MyByteBuff {
                 offset = 0;
             }
         }
-        return new String(bytes);
+        return bytes;
     }
 
     public void skip(int c) {

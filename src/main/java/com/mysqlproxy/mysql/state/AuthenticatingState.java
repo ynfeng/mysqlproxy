@@ -2,6 +2,7 @@ package com.mysqlproxy.mysql.state;
 
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.handler.backend.BackendAuthenticatingStateHandler;
+import com.mysqlproxy.mysql.handler.frontend.FrontendAuthenticatingStateHandler;
 
 /**
  * Created by ynfeng on 2017/5/12.
@@ -17,6 +18,6 @@ public class AuthenticatingState implements MysqlConnectionState {
 
     @Override
     public void frontendHandle(MysqlConnection connection, Object o) {
-
+        FrontendAuthenticatingStateHandler.INSTANCE.handle(connection,o);
     }
 }

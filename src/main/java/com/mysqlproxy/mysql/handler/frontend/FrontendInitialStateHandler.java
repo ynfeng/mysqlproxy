@@ -18,10 +18,10 @@ import java.io.IOException;
 /**
  * Created by ynfeng on 2017/5/18.
  */
-public class FrontInitialStateHandler implements StateHandler {
-    public static final FrontInitialStateHandler INSTANCE = new FrontInitialStateHandler();
+public class FrontendInitialStateHandler implements StateHandler {
+    public static final FrontendInitialStateHandler INSTANCE = new FrontendInitialStateHandler();
 
-    private FrontInitialStateHandler() {
+    private FrontendInitialStateHandler() {
 
     }
 
@@ -72,7 +72,7 @@ public class FrontInitialStateHandler implements StateHandler {
             mysqlConnection.disableRead();
             mysqlConnection.setState(ConnectingState.INSTANCE);
             mysqlConnection.writePacket(packet, InitalHandshakeCodec.INSTANCE);
-        } catch (IOException e) {
+        } catch (Exception e) {
             mysqlConnection.setState(CloseState.INSTANCE);
             mysqlConnection.drive(null);
         }
