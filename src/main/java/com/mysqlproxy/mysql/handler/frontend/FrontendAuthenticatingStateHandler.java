@@ -1,8 +1,10 @@
 package com.mysqlproxy.mysql.handler.frontend;
 
 import com.mysqlproxy.mysql.MysqlConnection;
+import com.mysqlproxy.mysql.codec.ErrorPacketEncoder;
 import com.mysqlproxy.mysql.codec.OKPacketEncoder;
 import com.mysqlproxy.mysql.handler.StateHandler;
+import com.mysqlproxy.mysql.protocol.ErrorPacket;
 import com.mysqlproxy.mysql.protocol.HandshakeResponse41Packet;
 import com.mysqlproxy.mysql.protocol.OKPacket;
 import com.mysqlproxy.mysql.protocol.ServerStatus;
@@ -30,9 +32,9 @@ public class FrontendAuthenticatingStateHandler implements StateHandler {
             //TODO 暂时只检查用户名
             if (handshakeResponse41Packet.username.equals("root")) {
                 logger.debug("前端认证成功");
-                int packetLenth = 7;
+                int packetLength = 7;
                 byte sequenceId = 2;
-                OKPacket okPacket = new OKPacket(packetLenth, sequenceId);
+                OKPacket okPacket = new OKPacket(packetLength, sequenceId);
                 okPacket.header = 0;
                 okPacket.lastInsertId = 0;
                 okPacket.affectedRows = 0;
@@ -46,6 +48,21 @@ public class FrontendAuthenticatingStateHandler implements StateHandler {
                 }
             } else {
                 logger.debug("前端认证失败");
+                String msg = "fuck off!";
+                int packetLength = 9 + msg.length();
+                byte sequenceId = 2;
+                ErrorPacket errorPacket = new ErrorPacket(packetLength,sequenceId);
+                errorPacket.header = (byte) 0xFF;
+                errorPacket.errCode = 1045;
+                errorPacket.sqlStateMarker = "#";
+                errorPacket.sqlState = "28000";
+                errorPacket.errMsg = msg;
+                try {
+                    mysqlConnection.writePacket(errorPacket, ErrorPacketEncoder.INSTANCE);
+                } catch (IOException e) {
+                    mysqlConnection.setState(CloseState.INSTANCE);
+                    mysqlConnection.drive(null);
+                }
             }
         } else {
             try {

@@ -28,7 +28,7 @@ public class MultiReactor {
     }
 
     public void postRegister(MysqlConnection mysqlConnection) {
-        if (index >= reactors.length) {
+        if (index >= reactors.length - 1) {
             index = 0;
         } else {
             index++;
