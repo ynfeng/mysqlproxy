@@ -63,9 +63,8 @@ public final class ByteBufferPool {
         }
 
         public boolean recyle(ByteBuffer byteBuffer) {
-            logger.debug("回收ByteBuffer,大小{},,绑定线程{}",byteBuffer.capacity(),owner);
+            logger.debug("回收ByteBuffer,大小{},绑定线程{}",byteBuffer.capacity(),owner);
             if (byteBuffer.capacity() == chunkSize) {
-                logger.debug("与chunk大小不一致，拒绝回收，chunkSize:{}",chunkSize);
                 freeBuffers.offer(byteBuffer);
                 return true;
             }

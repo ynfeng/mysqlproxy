@@ -48,7 +48,7 @@ public class FrontendAuthenticatingStateHandler implements StateHandler {
                 }
             } else {
                 logger.debug("前端认证失败");
-                String msg = "fuck off!";
+                String msg = "wrong user!";
                 int packetLength = 9 + msg.length();
                 byte sequenceId = 2;
                 ErrorPacket errorPacket = new ErrorPacket(packetLength,sequenceId);

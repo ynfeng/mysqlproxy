@@ -68,7 +68,7 @@ public class Connector {
                             key.interestOps(key.interestOps() & ~SelectionKey.OP_CONNECT);
                             BackendMysqlConnection connection = (BackendMysqlConnection) key.attachment();
                             if (connection.getFrontendMysqlConnection() != null &&
-                                    connection.getFrontendMysqlConnection().getReactor() == null) {
+                                    connection.getFrontendMysqlConnection().getReactor() != null) {
                                 connection.getFrontendMysqlConnection().getReactor().register(connection);
                             } else {
                                 ServerContext.getInstance().getMultiReactor().postRegister(connection);

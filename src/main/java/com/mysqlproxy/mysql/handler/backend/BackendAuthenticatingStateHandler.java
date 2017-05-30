@@ -39,13 +39,11 @@ public class BackendAuthenticatingStateHandler implements StateHandler {
                 mysqlConnection.getReadBuffer().clear();
                 mysqlConnection.getWriteBuffer().clear();
                 FrontendMysqlConnection frontendMysqlConnection = ((BackendMysqlConnection) mysqlConnection).getFrontendMysqlConnection();
-                if (frontendMysqlConnection != null) {
-                    //此时的前端处于等待状态需要驱动到下一个状态
-                    frontendMysqlConnection.drive(null);
+                if (frontendMysqlConnection != null && !(frontendMysqlConnection.getState() instanceof ComIdleState)) {
+                    mysqlConnection.getReactor().register(frontendMysqlConnection);
                 }
                 //转换到空闲状态
                 mysqlConnection.setState(ComIdleState.INSTANCE);
-                mysqlConnection.enableRead();
             } else {
                 //TODO 还有一个切换认证方法的请求未实现
                 mysqlConnection.disableRead();
