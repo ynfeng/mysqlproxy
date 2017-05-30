@@ -2,6 +2,8 @@ package com.mysqlproxy.net;
 
 import com.mysqlproxy.ServerContext;
 import com.mysqlproxy.mysql.BackendMysqlConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -14,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Created by ynfeng on 2017/5/12.
  */
 public class Connector {
+    private Logger logger = LoggerFactory.getLogger(Connector.class);
     private Selector selector;
     private ConcurrentLinkedQueue<BackendMysqlConnection> connectQueue = new ConcurrentLinkedQueue();
 
@@ -26,6 +29,7 @@ public class Connector {
     }
 
     public void connect(BackendMysqlConnection backendMysqlConnection) {
+        logger.debug("新建后端连接");
         connectQueue.offer(backendMysqlConnection);
         selector.wakeup();
     }

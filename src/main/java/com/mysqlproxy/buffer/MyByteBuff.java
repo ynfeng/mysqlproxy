@@ -375,4 +375,11 @@ public final class MyByteBuff {
         return readIndex < writeIndex;
     }
 
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
 }

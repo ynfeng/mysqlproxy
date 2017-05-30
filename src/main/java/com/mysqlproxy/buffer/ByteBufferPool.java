@@ -1,5 +1,8 @@
 package com.mysqlproxy.buffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -11,6 +14,7 @@ import java.util.TreeSet;
  * 非线程安全的类,用于分配底层的ByteBuffer
  */
 public final class ByteBufferPool {
+    private Logger logger = LoggerFactory.getLogger(ByteBufferPool.class);
     private TreeSet<Chunk> index = new TreeSet();
     private final long owner;
 
@@ -23,9 +27,11 @@ public final class ByteBufferPool {
         if (currentThreadId != owner) {
             throw new RuntimeException("can't allocate ByteBuffer in threadId " + currentThreadId);
         }
+        logger.debug("分配ByteBuffer，大小:{},绑定线程{}",reqCapacity,owner);
         Chunk newChunk = new Chunk((int) (reqCapacity));
         Chunk find = index.ceiling(newChunk);
         if (find == null) {
+            logger.debug("没有空闲的ByteBuffer,绑定线程{}",owner);
             index.add(newChunk);
             find = newChunk;
         }
@@ -57,7 +63,9 @@ public final class ByteBufferPool {
         }
 
         public boolean recyle(ByteBuffer byteBuffer) {
+            logger.debug("回收ByteBuffer,大小{},,绑定线程{}",byteBuffer.capacity(),owner);
             if (byteBuffer.capacity() == chunkSize) {
+                logger.debug("与chunk大小不一致，拒绝回收，chunkSize:{}",chunkSize);
                 freeBuffers.offer(byteBuffer);
                 return true;
             }

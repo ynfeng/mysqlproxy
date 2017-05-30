@@ -3,6 +3,8 @@ package com.mysqlproxy.net;
 import com.mysqlproxy.ServerContext;
 import com.mysqlproxy.mysql.BackendMysqlConnection;
 import com.mysqlproxy.mysql.FrontendMysqlConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,6 +19,7 @@ import java.util.Set;
  * Created by ynfeng on 2017/5/12.
  */
 public class Acceptor {
+    private Logger logger = LoggerFactory.getLogger(Acceptor.class);
     private Selector selector;
     private SelectionKey selectionKey;
     private ServerSocketChannel serverSocketChannel;
@@ -33,6 +36,7 @@ public class Acceptor {
     }
 
     public void startup() {
+        logger.info("服务器启动，监听端口3306");
         selectionKey.interestOps(SelectionKey.OP_ACCEPT);
         new AcceptorThread().start();
     }

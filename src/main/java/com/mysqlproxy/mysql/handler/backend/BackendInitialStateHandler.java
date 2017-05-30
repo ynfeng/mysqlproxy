@@ -1,8 +1,6 @@
 package com.mysqlproxy.mysql.handler.backend;
 
 
-import com.mysqlproxy.mysql.BackendMysqlConnection;
-import com.mysqlproxy.mysql.MysqlBackendConnectionPool;
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.codec.InitalHandshakeCodec;
 import com.mysqlproxy.mysql.handler.StateHandler;
@@ -11,13 +9,14 @@ import com.mysqlproxy.mysql.protocol.InitialHandshakeV10Packet;
 import com.mysqlproxy.mysql.protocol.MysqlPacket;
 import com.mysqlproxy.mysql.state.CloseState;
 import com.mysqlproxy.mysql.state.ConnectingState;
-
-import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by ynfeng on 2017/5/18.
  */
 public class BackendInitialStateHandler implements StateHandler {
+    private Logger logger = LoggerFactory.getLogger(BackendAuthenticatingStateHandler.class);
     public static final BackendInitialStateHandler INSTANCE = new BackendInitialStateHandler();
 
     private BackendInitialStateHandler() {
@@ -27,6 +26,7 @@ public class BackendInitialStateHandler implements StateHandler {
     @Override
     public void handle(MysqlConnection mysqlConnection, Object object) {
         try {
+            logger.debug("后端接收Mysql初始握手包");
             MysqlPacket packet = mysqlConnection.readPacket(InitalHandshakeCodec.INSTANCE);
             if (packet instanceof ErrorPacket) {
                 mysqlConnection.disableRead();

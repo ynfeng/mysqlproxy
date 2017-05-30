@@ -10,13 +10,15 @@ import com.mysqlproxy.mysql.protocol.MysqlPacket;
 import com.mysqlproxy.mysql.protocol.OKPacket;
 import com.mysqlproxy.mysql.state.CloseState;
 import com.mysqlproxy.mysql.state.ComIdleState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 
 /**
  * Created by ynfeng on 2017/5/24.
  */
 public class BackendAuthenticatingStateHandler implements StateHandler {
+    private Logger logger = LoggerFactory.getLogger(BackendAuthenticatingStateHandler.class);
     public final static BackendAuthenticatingStateHandler INSTANCE = new BackendAuthenticatingStateHandler();
 
     private BackendAuthenticatingStateHandler() {
@@ -27,10 +29,12 @@ public class BackendAuthenticatingStateHandler implements StateHandler {
         try {
             MysqlPacket mysqlPacket = mysqlConnection.readPacket(AuthenticateCodec.INSTANCE);
             if (mysqlPacket instanceof ErrorPacket) {
+                logger.debug("后端接收Mysql认证响应结果,Error包");
                 mysqlConnection.disableRead();
                 mysqlConnection.setState(CloseState.INSTANCE);
                 mysqlConnection.drive(null);
             } else if (mysqlPacket instanceof OKPacket) {
+                logger.debug("后端接收Mysql认证响应结果,OK包");
                 //认证成功，清空所有缓冲区
                 mysqlConnection.getReadBuffer().clear();
                 mysqlConnection.getWriteBuffer().clear();

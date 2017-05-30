@@ -7,6 +7,8 @@ import com.mysqlproxy.mysql.protocol.HandshakeResponse41Packet;
 import com.mysqlproxy.mysql.protocol.MysqlPacket;
 import com.mysqlproxy.mysql.state.AuthenticatingState;
 import com.mysqlproxy.mysql.state.CloseState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -14,7 +16,7 @@ import com.mysqlproxy.mysql.state.CloseState;
  * <p>
  */
 public class FrontendResponseHandshakeStateHandler implements StateHandler {
-
+    private Logger logger = LoggerFactory.getLogger(FrontendResponseHandshakeStateHandler.class);
     public static final FrontendResponseHandshakeStateHandler INSTANCE = new FrontendResponseHandshakeStateHandler();
 
     private FrontendResponseHandshakeStateHandler() {
@@ -23,6 +25,7 @@ public class FrontendResponseHandshakeStateHandler implements StateHandler {
     @Override
     public void handle(MysqlConnection mysqlConnection, Object object) {
         try {
+            logger.debug("接收前端握手包响应");
             MysqlPacket mysqlPacket = mysqlConnection.readPacket(ResponseHandshakeCodec.INSTANCE);
             if (mysqlPacket != null) {
                 if (mysqlPacket instanceof HandshakeResponse41Packet) {

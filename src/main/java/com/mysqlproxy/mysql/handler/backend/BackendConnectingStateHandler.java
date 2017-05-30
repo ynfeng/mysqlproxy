@@ -8,6 +8,8 @@ import com.mysqlproxy.mysql.protocol.*;
 import com.mysqlproxy.mysql.state.CloseState;
 import com.mysqlproxy.mysql.state.RespondHandshakeState;
 import com.mysqlproxy.util.AuthenticationMethodUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -15,12 +17,13 @@ import java.io.IOException;
  * Created by ynfeng on 2017/5/16.
  */
 public class BackendConnectingStateHandler implements StateHandler<InitialHandshakeV10Packet> {
-
+    private Logger logger = LoggerFactory.getLogger(BackendConnectingStateHandler.class);
     public static final BackendConnectingStateHandler INSTANCE = new BackendConnectingStateHandler();
 
 
     @Override
     public void handle(MysqlConnection mysqlConnection, InitialHandshakeV10Packet packet) {
+        logger.debug("后端响应握手包");
         //构建响应包
         String username = "root";
         byte[] passwrod = AuthenticationMethodUtil.generateMysqlNativePassword("123456", packet.authPluginDataPart);

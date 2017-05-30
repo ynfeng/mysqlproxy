@@ -5,6 +5,7 @@ import com.mysqlproxy.ServerContext;
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.codec.InitalHandshakeCodec;
 import com.mysqlproxy.mysql.handler.StateHandler;
+import com.mysqlproxy.mysql.handler.backend.BackendAuthenticatingStateHandler;
 import com.mysqlproxy.mysql.protocol.CapabilityFlags;
 import com.mysqlproxy.mysql.protocol.CharacterSet;
 import com.mysqlproxy.mysql.protocol.InitialHandshakeV10Packet;
@@ -12,6 +13,8 @@ import com.mysqlproxy.mysql.protocol.ServerStatus;
 import com.mysqlproxy.mysql.state.CloseState;
 import com.mysqlproxy.mysql.state.ConnectingState;
 import com.mysqlproxy.util.AuthenticationMethodUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -19,6 +22,7 @@ import java.io.IOException;
  * Created by ynfeng on 2017/5/18.
  */
 public class FrontendInitialStateHandler implements StateHandler {
+    private Logger logger = LoggerFactory.getLogger(FrontendInitialStateHandler.class);
     public static final FrontendInitialStateHandler INSTANCE = new FrontendInitialStateHandler();
 
     private FrontendInitialStateHandler() {
@@ -27,6 +31,7 @@ public class FrontendInitialStateHandler implements StateHandler {
 
     @Override
     public void handle(MysqlConnection mysqlConnection, Object object) {
+        logger.debug("向前端响应初始握手包");
         //构建初始握手包
         String serverVersion = "mysqlproxy 0.0.1";
         String authPluginName = "mysql_native_password";

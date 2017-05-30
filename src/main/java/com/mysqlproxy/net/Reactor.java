@@ -5,6 +5,8 @@ import com.mysqlproxy.buffer.MyByteBuffAllocator;
 import com.mysqlproxy.mysql.FrontendMysqlConnection;
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.Connection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -20,6 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * 分配和回收动作必须在Reactor线程中执行，以减少同步消耗
  */
 public class Reactor {
+    private Logger logger = LoggerFactory.getLogger(Reactor.class);
     private final Selector selector;
     private final ConcurrentLinkedQueue<Connection> registerQueue;
     private final ByteBufferPool byteBufferPool;
