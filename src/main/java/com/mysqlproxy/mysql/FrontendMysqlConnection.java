@@ -1,7 +1,10 @@
 package com.mysqlproxy.mysql;
 
+import com.mysqlproxy.buffer.MyByteBuff;
 import com.mysqlproxy.mysql.protocol.MysqlPacket;
 import com.mysqlproxy.mysql.state.InitialState;
+
+import java.io.IOException;
 
 
 /**
@@ -31,5 +34,10 @@ public final class FrontendMysqlConnection extends MysqlConnection<MysqlPacket> 
         getState().frontendHandle(this, attachment);
     }
 
-
+    public int writeInDirectTransferMode(MyByteBuff myByteBuff) throws IOException {
+        int writed = myByteBuff.transferToChannel(getSocketChannel());
+        setDirectTransferPacketWriteLen(getDirectTransferPacketWriteLen() + writed);
+        getBackendMysqlConnection().setDirectTransferPacketWriteLen(getBackendMysqlConnection().getDirectTransferPacketWriteLen() + writed);
+        return writed;
+    }
 }

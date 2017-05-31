@@ -31,8 +31,8 @@ public final class BackendMysqlConnection extends MysqlConnection<MysqlPacket> {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            myByteBuffAllocator.recyle(getReadBuffer());
-            myByteBuffAllocator.recyle(getWriteBuffer());
+//            myByteBuffAllocator.recyle(getReadBuffer());
+//            myByteBuffAllocator.recyle(getWriteBuffer());
             setReadBuff(null);
             setWriteBuff(null);
         }
@@ -41,7 +41,7 @@ public final class BackendMysqlConnection extends MysqlConnection<MysqlPacket> {
     public int writeInDirectTransferMode(MyByteBuff myByteBuff) throws IOException {
         int writed = myByteBuff.transferToChannel(getSocketChannel());
         setDirectTransferPacketWriteLen(getDirectTransferPacketWriteLen() + writed);
-        getFrontendMysqlConnection().setDirectTransferPacketLen(getFrontendMysqlConnection().getDirectTransferPacketWriteLen() + writed);
+        getFrontendMysqlConnection().setDirectTransferPacketWriteLen(getFrontendMysqlConnection().getDirectTransferPacketWriteLen() + writed);
         return writed;
     }
 

@@ -32,6 +32,8 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     protected MyByteBuffAllocator myByteBuffAllocator;
     private int directTransferPacketLen;
     private int directTransferPacketWriteLen;
+    private boolean writeFlag;
+    private boolean readFlag;
 
 
     public void setState(MysqlConnectionState state) {
@@ -76,7 +78,7 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     public MyByteBuff read() throws IOException {
         MyByteBuff readBuffer = getReadBuffer();
         if (readBuffer == null) {
-            readBuffer = myByteBuffAllocator.allocate(1024 * 1024);
+            readBuffer = myByteBuffAllocator.allocate(1);
             setReadBuff(readBuffer);
         }
         readBuffer.transferFromChannel(getSocketChannel());
@@ -98,22 +100,29 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
 
     public void enableRead() {
         getSelectionKey().interestOps(getSelectionKey().interestOps() | SelectionKey.OP_WRITE);
+        readFlag = true;
     }
 
     public void disableRead() {
         getSelectionKey().interestOps(getSelectionKey().interestOps() & ~SelectionKey.OP_READ);
+        readFlag = false;
     }
 
     public void disableReadAndEnableWrite() {
         getSelectionKey().interestOps((getSelectionKey().interestOps() & ~SelectionKey.OP_READ) | SelectionKey.OP_WRITE);
+        readFlag = false;
+        writeFlag = true;
     }
 
     public void disableWriteAndEnableRead() {
         getSelectionKey().interestOps((getSelectionKey().interestOps() & ~SelectionKey.OP_WRITE) | SelectionKey.OP_READ);
+        writeFlag = false;
+        readFlag = true;
     }
 
     public void enableWrite() {
         getSelectionKey().interestOps(getSelectionKey().interestOps() | SelectionKey.OP_WRITE);
+        writeFlag = true;
     }
 
     public void disableWrite() {
@@ -128,7 +137,7 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     public void writePacket(MysqlPacket packet, Encoder<MysqlPacket> encoder) throws IOException {
         MyByteBuff buff = getWriteBuffer();
         if (buff == null) {
-            buff = myByteBuffAllocator.allocate(1024 * 1024);
+            buff = myByteBuffAllocator.allocate(1);
         }
         encoder.encode(packet, buff);
         setWriteBuff(buff);
@@ -192,7 +201,7 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     }
 
     public void setDirectTransferPacketLen(int directTransferPacketLen) {
-        this.directTransferPacketLen = directTransferPacketLen + 4;
+        this.directTransferPacketLen = directTransferPacketLen;
     }
 
     public int getDirectTransferPacketWriteLen() {
@@ -201,5 +210,13 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
 
     public void setDirectTransferPacketWriteLen(int directTransferPacketWriteLen) {
         this.directTransferPacketWriteLen = directTransferPacketWriteLen;
+    }
+
+    public boolean canWrite(){
+        return writeFlag;
+    }
+
+    public boolean canRead(){
+        return readFlag;
     }
 }

@@ -109,11 +109,13 @@ public final class MyByteBuff {
         long writed;
         byteBufferArray[readBufferArrayIndex].flip();
         while (readIndex < writeIndex) {
+            System.out.println("r---------------" + readIndex + "-------" + writeIndex);
             writed = socketChannel.write(byteBufferArray, readBufferArrayIndex, 1);
             readIndex += writed;
             totalWrite += writed;
-            if (byteBufferArray[writeBufferArrayIndex].capacity() == byteBufferArray[writeBufferArrayIndex].position()) {
-                this.writeBufferArrayIndex = ++writeBufferArrayIndex;
+            if (byteBufferArray[readBufferArrayIndex].capacity() == byteBufferArray[readBufferArrayIndex].position()
+                    && readBufferArrayIndex < writeBufferArrayIndex) {
+                this.readBufferArrayIndex = ++readBufferArrayIndex;
                 byteBufferArray[readBufferArrayIndex].flip();
             }
         }
@@ -122,21 +124,23 @@ public final class MyByteBuff {
 
     public int transferFromChannel(SocketChannel socketChannel) throws IOException {
         int totalRead = 0;
-        long readed = 0;
-        ensureCapacity(defaultSize);
-        while ((readed = socketChannel.read(byteBufferArray, writeBufferArrayIndex, 1)) != 0) {
+        long readed = socketChannel.read(byteBufferArray, writeBufferArrayIndex, 1);
+        for (; ; ) {
+            this.freeBytes -= readed;
+            if (freeBytes == 0) {
+                ensureCapacity(defaultSize);
+            }
             if (readed == -1) {
                 return totalRead;
+            } else if (readed == 0) {
+                break;
             }
             writeIndex += readed;
             totalRead += readed;
-            this.freeBytes -= readed;
             if (byteBufferArray[writeBufferArrayIndex].capacity() == byteBufferArray[writeBufferArrayIndex].position()) {
                 this.writeBufferArrayIndex = ++writeBufferArrayIndex;
             }
-            if (freeBytes < (defaultSize / 2)) {
-                ensureCapacity(defaultSize);
-            }
+            readed = socketChannel.read(byteBufferArray, writeBufferArrayIndex, 1);
         }
         return totalRead;
     }
@@ -186,23 +190,6 @@ public final class MyByteBuff {
         this.writeInt(val, writeIndex, len);
     }
 
-    private void writeInt(long val, int startPos, int len) {
-        ensureCapacity(len);
-        int index = getByteBufferArrayIndex(startPos);
-        int offset = getByteBufferOffset(startPos);
-        ByteBuffer byteBuffer = byteBufferArray[index];
-        for (int i = 0; i < len; i++) {
-            byte b = (byte) ((val >> (i * 8)) & 0xFF);
-            byteBuffer.put(offset++, b);
-            byteBuffer.position(byteBuffer.position() + 1);
-            freeBytes--;
-            writeIndex++;
-            if (offset >= byteBuffer.capacity()) {
-                byteBuffer = byteBufferArray[++index];
-                offset = 0;
-            }
-        }
-    }
 
     public void writeString(String val) {
         this.writeBytes(val.getBytes(), writeIndex);
@@ -219,6 +206,19 @@ public final class MyByteBuff {
             return this.readFixLengthInteger(3);
         } else {
             return this.readFixLengthInteger(4);
+        }
+    }
+
+    public long getLenenc(int startPos) {
+        int lenenc = (int) this.getFixLenthInteger(startPos, 1);
+        if (lenenc < 0xFB) {
+            return this.getFixLenthInteger(startPos, 1);
+        } else if (lenenc == 0xFC) {
+            return this.getFixLenthInteger(startPos, 2);
+        } else if (lenenc == 0xFE) {
+            return this.getFixLenthInteger(startPos, 3);
+        } else {
+            return this.getFixLenthInteger(startPos, 4);
         }
     }
 
@@ -265,7 +265,27 @@ public final class MyByteBuff {
             byteBuffer.position(byteBuffer.position() + 1);
             freeBytes--;
             writeIndex++;
-            if (offset >= byteBuffer.capacity()) {
+            this.writeBufferArrayIndex = index;
+            if (offset >= byteBuffer.capacity() && index < curBufferArrayIndex) {
+                byteBuffer = byteBufferArray[++index];
+                offset = 0;
+            }
+        }
+    }
+
+    private void writeInt(long val, int startPos, int len) {
+        ensureCapacity(len);
+        int index = getByteBufferArrayIndex(startPos);
+        int offset = getByteBufferOffset(startPos);
+        ByteBuffer byteBuffer = byteBufferArray[index];
+        for (int i = 0; i < len; i++) {
+            byte b = (byte) ((val >> (i * 8)) & 0xFF);
+            byteBuffer.put(offset++, b);
+            byteBuffer.position(byteBuffer.position() + 1);
+            freeBytes--;
+            writeIndex++;
+            this.writeBufferArrayIndex = index;
+            if (offset >= byteBuffer.capacity() && index < curBufferArrayIndex) {
                 byteBuffer = byteBufferArray[++index];
                 offset = 0;
             }

@@ -11,7 +11,7 @@ public abstract class AbstractComIdleStateHandler implements StateHandler {
     protected void switchState(MysqlConnection connection, int readableBytes, byte commandType, int packageLength) {
         if (readableBytes >= 4) {
             if (commandType == CommandType.COM_QUERY) {
-                connection.setDirectTransferPacketLen(packageLength);
+                connection.setDirectTransferPacketLen(packageLength + 4);
                 connection.setState(ComQueryState.INSTANCE);
                 connection.drive(null);
             }

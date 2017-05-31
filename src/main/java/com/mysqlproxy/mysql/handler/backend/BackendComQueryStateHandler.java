@@ -2,9 +2,9 @@ package com.mysqlproxy.mysql.handler.backend;
 
 import com.mysqlproxy.buffer.MyByteBuff;
 import com.mysqlproxy.mysql.BackendMysqlConnection;
-import com.mysqlproxy.mysql.FrontendMysqlConnection;
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.handler.StateHandler;
+import com.mysqlproxy.mysql.state.ComQueryResponseState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +24,14 @@ public class BackendComQueryStateHandler implements StateHandler {
         BackendMysqlConnection backendMysqlConnection = (BackendMysqlConnection) connection;
         MyByteBuff myByteBuff = backendMysqlConnection.getWriteBuffer();
         try {
-            if(backendMysqlConnection.isDirectTransferComplete()){
+            if (backendMysqlConnection.getDirectTransferPacketWriteLen() == 0 &&
+                    backendMysqlConnection.isDirectTransferComplete()) {
                 logger.debug("后端向MYSQL发送COM_QUERY包完成，转换至下一状态");
                 backendMysqlConnection.setDirectTransferPacketWriteLen(0);
                 backendMysqlConnection.setDirectTransferPacketLen(0);
-                backendMysqlConnection.disableWriteAndEnableRead();
-                //TODO 转换状态
+                connection.disableWriteAndEnableRead();
+                backendMysqlConnection.setState(ComQueryResponseState.INSTANCE);
+                backendMysqlConnection.getFrontendMysqlConnection().drive(null);
             } else {
                 logger.debug("后端向MYSQL发送COM_QUERY包");
                 backendMysqlConnection.writeInDirectTransferMode(myByteBuff);

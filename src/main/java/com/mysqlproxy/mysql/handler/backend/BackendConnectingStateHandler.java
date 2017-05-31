@@ -57,6 +57,7 @@ public class BackendConnectingStateHandler implements StateHandler<InitialHandsh
             mysqlConnection.setState(RespondHandshakeState.INSTANCE);
             mysqlConnection.writePacket(responseHandshake, ResponseHandshakeCodec.INSTANCE);
         } catch (Exception e) {
+            e.printStackTrace();
             // 编码出错，转换状态
             mysqlConnection.setState(CloseState.INSTANCE);
             mysqlConnection.drive(null);
