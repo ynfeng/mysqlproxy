@@ -134,7 +134,9 @@ public final class MyByteBuff {
             if (byteBufferArray[writeBufferArrayIndex].capacity() == byteBufferArray[writeBufferArrayIndex].position()) {
                 this.writeBufferArrayIndex = ++writeBufferArrayIndex;
             }
-            ensureCapacity(defaultSize);
+            if (freeBytes < (defaultSize / 2)) {
+                ensureCapacity(defaultSize);
+            }
         }
         return totalRead;
     }

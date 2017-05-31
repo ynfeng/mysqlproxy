@@ -68,6 +68,8 @@ public class FrontendAuthenticatingStateHandler implements StateHandler {
             try {
                 if(mysqlConnection.flushWriteBuffer()){
                     mysqlConnection.disableWriteAndEnableRead();
+                    mysqlConnection.getReadBuffer().clear();
+                    mysqlConnection.getWriteBuffer().clear();
                     mysqlConnection.setState(ComIdleState.INSTANCE);
                 }
             } catch (IOException e) {

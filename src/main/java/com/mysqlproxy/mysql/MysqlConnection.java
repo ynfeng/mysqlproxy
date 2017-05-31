@@ -30,6 +30,8 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     private MyByteBuff writeBuff;
     private Reactor reactor;
     protected MyByteBuffAllocator myByteBuffAllocator;
+    private int directTransferPacketLen;
+    private int directTransferPacketWriteLen;
 
 
     public void setState(MysqlConnectionState state) {
@@ -94,12 +96,16 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
         return myByteBuff.transferToChannel(getSocketChannel());
     }
 
-    public void enableRead(){
+    public void enableRead() {
         getSelectionKey().interestOps(getSelectionKey().interestOps() | SelectionKey.OP_WRITE);
     }
 
     public void disableRead() {
         getSelectionKey().interestOps(getSelectionKey().interestOps() & ~SelectionKey.OP_READ);
+    }
+
+    public void disableReadAndEnableWrite() {
+        getSelectionKey().interestOps((getSelectionKey().interestOps() & ~SelectionKey.OP_READ) | SelectionKey.OP_WRITE);
     }
 
     public void disableWriteAndEnableRead() {
@@ -108,6 +114,10 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
 
     public void enableWrite() {
         getSelectionKey().interestOps(getSelectionKey().interestOps() | SelectionKey.OP_WRITE);
+    }
+
+    public void disableWrite() {
+        getSelectionKey().interestOps(getSelectionKey().interestOps() & ~SelectionKey.OP_WRITE);
     }
 
     public MysqlPacket readPacket(Decoder<MysqlPacket> decoder) throws IOException {
@@ -135,6 +145,28 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
         return writeBuff;
     }
 
+    public boolean recyleWriteBuffer() {
+        boolean success = false;
+        if (getWriteBuffer() != null) {
+            success = myByteBuffAllocator.recyle(getWriteBuffer());
+            setWriteBuff(null);
+        }
+        return success;
+    }
+
+    public boolean recyleReadBuffer() {
+        boolean success = false;
+        if (getReadBuffer() != null) {
+            success = myByteBuffAllocator.recyle(getReadBuffer());
+            setReadBuff(null);
+        }
+        return success;
+    }
+
+    public boolean isDirectTransferComplete() {
+        return directTransferPacketLen <= directTransferPacketWriteLen;
+    }
+
     public void setReadBuff(MyByteBuff readBuff) {
         this.readBuff = readBuff;
     }
@@ -153,5 +185,21 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
 
     public void setReactor(Reactor reactor) {
         this.reactor = reactor;
+    }
+
+    public int getDirectTransferPacketLen() {
+        return directTransferPacketLen;
+    }
+
+    public void setDirectTransferPacketLen(int directTransferPacketLen) {
+        this.directTransferPacketLen = directTransferPacketLen + 4;
+    }
+
+    public int getDirectTransferPacketWriteLen() {
+        return directTransferPacketWriteLen;
+    }
+
+    public void setDirectTransferPacketWriteLen(int directTransferPacketWriteLen) {
+        this.directTransferPacketWriteLen = directTransferPacketWriteLen;
     }
 }

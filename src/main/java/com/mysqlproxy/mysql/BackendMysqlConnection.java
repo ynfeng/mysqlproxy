@@ -1,5 +1,6 @@
 package com.mysqlproxy.mysql;
 
+import com.mysqlproxy.buffer.MyByteBuff;
 import com.mysqlproxy.mysql.protocol.MysqlPacket;
 import com.mysqlproxy.mysql.state.InitialState;
 
@@ -35,6 +36,13 @@ public final class BackendMysqlConnection extends MysqlConnection<MysqlPacket> {
             setReadBuff(null);
             setWriteBuff(null);
         }
+    }
+
+    public int writeInDirectTransferMode(MyByteBuff myByteBuff) throws IOException {
+        int writed = myByteBuff.transferToChannel(getSocketChannel());
+        setDirectTransferPacketWriteLen(getDirectTransferPacketWriteLen() + writed);
+        getFrontendMysqlConnection().setDirectTransferPacketLen(getFrontendMysqlConnection().getDirectTransferPacketWriteLen() + writed);
+        return writed;
     }
 
     public void drive(Object attachment) {
