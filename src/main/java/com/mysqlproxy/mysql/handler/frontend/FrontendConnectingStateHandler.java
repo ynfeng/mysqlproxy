@@ -25,6 +25,7 @@ public class FrontendConnectingStateHandler implements StateHandler {
                 connection.setState(RespondHandshakeState.INSTANCE);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             connection.setState(CloseState.INSTANCE);
             connection.drive(null);
         }

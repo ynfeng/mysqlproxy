@@ -78,6 +78,7 @@ public class FrontendInitialStateHandler implements StateHandler {
             mysqlConnection.setState(ConnectingState.INSTANCE);
             mysqlConnection.writePacket(packet, InitalHandshakeCodec.INSTANCE);
         } catch (Exception e) {
+            e.printStackTrace();
             mysqlConnection.setState(CloseState.INSTANCE);
             mysqlConnection.drive(null);
         }

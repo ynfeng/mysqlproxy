@@ -113,9 +113,9 @@ public final class MyByteBuff {
             writed = socketChannel.write(byteBufferArray, readBufferArrayIndex, 1);
             readIndex += writed;
             totalWrite += writed;
-            if (byteBufferArray[readBufferArrayIndex].capacity() == byteBufferArray[readBufferArrayIndex].position()
+            if (byteBufferArray[readBufferArrayIndex].limit() == byteBufferArray[readBufferArrayIndex].position()
                     && readBufferArrayIndex < writeBufferArrayIndex) {
-                this.readBufferArrayIndex = ++readBufferArrayIndex;
+                this.readBufferArrayIndex = readBufferArrayIndex + 1;
                 byteBufferArray[readBufferArrayIndex].flip();
             }
         }
@@ -324,7 +324,7 @@ public final class MyByteBuff {
                 }
             }
             if (nulIndex == 0) {
-                if (index + 1 >= curBufferArrayIndex) {
+                if (index + 1 > curBufferArrayIndex) {
                     return null;
                 }
                 //未找到结束标志，跳到一下个

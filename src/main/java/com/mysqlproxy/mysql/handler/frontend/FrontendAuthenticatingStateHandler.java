@@ -43,6 +43,7 @@ public class FrontendAuthenticatingStateHandler implements StateHandler {
                 try {
                     mysqlConnection.writePacket(okPacket, OKPacketEncoder.INSTANCE);
                 } catch (IOException e) {
+                    e.printStackTrace();
                     mysqlConnection.setState(CloseState.INSTANCE);
                     mysqlConnection.drive(null);
                 }
@@ -60,6 +61,7 @@ public class FrontendAuthenticatingStateHandler implements StateHandler {
                 try {
                     mysqlConnection.writePacket(errorPacket, ErrorPacketEncoder.INSTANCE);
                 } catch (IOException e) {
+                    e.printStackTrace();
                     mysqlConnection.setState(CloseState.INSTANCE);
                     mysqlConnection.drive(null);
                 }
@@ -73,6 +75,7 @@ public class FrontendAuthenticatingStateHandler implements StateHandler {
                     mysqlConnection.setState(ComIdleState.INSTANCE);
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 mysqlConnection.setState(CloseState.INSTANCE);
                 mysqlConnection.drive(null);
             }

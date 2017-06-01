@@ -51,6 +51,7 @@ public class BackendAuthenticatingStateHandler implements StateHandler {
                 mysqlConnection.drive(null);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             mysqlConnection.setState(CloseState.INSTANCE);
         }
 

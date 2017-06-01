@@ -78,7 +78,7 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     public MyByteBuff read() throws IOException {
         MyByteBuff readBuffer = getReadBuffer();
         if (readBuffer == null) {
-            readBuffer = myByteBuffAllocator.allocate(1);
+            readBuffer = myByteBuffAllocator.allocate(2);
             setReadBuff(readBuffer);
         }
         readBuffer.transferFromChannel(getSocketChannel());
@@ -137,7 +137,7 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     public void writePacket(MysqlPacket packet, Encoder<MysqlPacket> encoder) throws IOException {
         MyByteBuff buff = getWriteBuffer();
         if (buff == null) {
-            buff = myByteBuffAllocator.allocate(1);
+            buff = myByteBuffAllocator.allocate(2);
         }
         encoder.encode(packet, buff);
         setWriteBuff(buff);

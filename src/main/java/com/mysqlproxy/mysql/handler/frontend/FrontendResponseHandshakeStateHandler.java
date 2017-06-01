@@ -35,6 +35,7 @@ public class FrontendResponseHandshakeStateHandler implements StateHandler {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             mysqlConnection.disableRead();
             mysqlConnection.setState(CloseState.INSTANCE);
             mysqlConnection.drive(null);
