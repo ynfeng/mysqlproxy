@@ -102,6 +102,7 @@ public final class MyByteBuff {
         readBufferArrayIndex = 0;
         writeBufferArrayIndex = 0;
         freeBytes = defaultSize;
+        capacity = defaultSize;
     }
 
     public int transferToChannel(SocketChannel socketChannel) throws IOException {
@@ -109,7 +110,6 @@ public final class MyByteBuff {
         long writed;
         byteBufferArray[readBufferArrayIndex].flip();
         while (readIndex < writeIndex) {
-            System.out.println("r---------------" + readIndex + "-------" + writeIndex);
             writed = socketChannel.write(byteBufferArray, readBufferArrayIndex, 1);
             readIndex += writed;
             totalWrite += writed;

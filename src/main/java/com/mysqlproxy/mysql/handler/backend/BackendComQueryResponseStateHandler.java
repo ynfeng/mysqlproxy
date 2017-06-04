@@ -5,6 +5,8 @@ import com.mysqlproxy.mysql.BackendMysqlConnection;
 import com.mysqlproxy.mysql.FrontendMysqlConnection;
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.handler.StateHandler;
+import com.mysqlproxy.mysql.state.ComQueryResponseColumnDefState;
+import com.mysqlproxy.mysql.state.ComQueryResponseState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,21 +23,18 @@ public class BackendComQueryResponseStateHandler implements StateHandler {
     @Override
     public void handle(MysqlConnection connection, Object o) {
         try {
+            logger.info("后端收到COM_QUERY_RESPONSE包");
+            int resultSetPos = 0;
             BackendMysqlConnection backendMysqlConnection = (BackendMysqlConnection) connection;
-            FrontendMysqlConnection frontendMysqlConnection = (FrontendMysqlConnection) ((BackendMysqlConnection) connection).getFrontendMysqlConnection();
-
-            if (backendMysqlConnection.getDirectTransferPacketWriteLen() != 0 &&
-                    backendMysqlConnection.isDirectTransferComplete()) {
-
-            } else {
-                logger.info("后端收到COM_QUERY_RESPONSE包,准备向前端透传");
-                MyByteBuff myByteBuff = backendMysqlConnection.read();
-                if(backendMysqlConnection.getDirectTransferPacketWriteLen() == 0){
-                    frontendMysqlConnection.recyleWriteBuffer();
-                    frontendMysqlConnection.setWriteBuff(myByteBuff);
+            MyByteBuff myByteBuff = backendMysqlConnection.read();
+            if(myByteBuff.getReadableBytes() >= 3){
+                int fieldCountPacketLen = (int) myByteBuff.getFixLenthInteger(resultSetPos,3);
+                if(myByteBuff.getReadableBytes() >= fieldCountPacketLen + 4){
+                    //第一个包完整，进入下一状态
+                    connection.setPacketScanPos(fieldCountPacketLen + 4);
+                    connection.setState(ComQueryResponseColumnDefState.INSTANCE);
+                    connection.drive(null);
                 }
-                backendMysqlConnection.setDirectTransferPacketLen(myByteBuff.getReadableBytes());
-                frontendMysqlConnection.drive(null);
             }
         } catch (IOException e) {
             //TODO 处理异常

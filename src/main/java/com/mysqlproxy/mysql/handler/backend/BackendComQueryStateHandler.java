@@ -24,7 +24,7 @@ public class BackendComQueryStateHandler implements StateHandler {
         BackendMysqlConnection backendMysqlConnection = (BackendMysqlConnection) connection;
         MyByteBuff myByteBuff = backendMysqlConnection.getWriteBuffer();
         try {
-            if (backendMysqlConnection.getDirectTransferPacketWriteLen() == 0 &&
+            if (backendMysqlConnection.getDirectTransferPacketWriteLen() != 0 &&
                     backendMysqlConnection.isDirectTransferComplete()) {
                 logger.debug("后端向MYSQL发送COM_QUERY包完成，转换至下一状态");
                 backendMysqlConnection.setDirectTransferPacketWriteLen(0);
@@ -34,6 +34,10 @@ public class BackendComQueryStateHandler implements StateHandler {
                 backendMysqlConnection.getFrontendMysqlConnection().drive(null);
             } else {
                 logger.debug("后端向MYSQL发送COM_QUERY包");
+                if(!backendMysqlConnection.canWrite()){
+                    backendMysqlConnection.enableWrite();
+                    return;
+                }
                 backendMysqlConnection.writeInDirectTransferMode(myByteBuff);
             }
         } catch (IOException e) {

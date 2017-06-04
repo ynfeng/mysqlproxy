@@ -19,7 +19,7 @@ import java.nio.channels.SocketChannel;
  * Created by ynfeng on 2017/5/11.
  */
 public abstract class MysqlConnection<T> implements Connection, StatefulConnection, NIOConnection {
-
+    private static final int  DEFAULT_BUFFER_LENGTH = 1024 * 1024;
     private MysqlConnectionState state;
 
     private SocketChannel socketChannel;
@@ -34,6 +34,8 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     private int directTransferPacketWriteLen;
     private boolean writeFlag;
     private boolean readFlag;
+    private int packetScanPos;
+
 
 
     public void setState(MysqlConnectionState state) {
@@ -78,7 +80,7 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     public MyByteBuff read() throws IOException {
         MyByteBuff readBuffer = getReadBuffer();
         if (readBuffer == null) {
-            readBuffer = myByteBuffAllocator.allocate(2);
+            readBuffer = myByteBuffAllocator.allocate(DEFAULT_BUFFER_LENGTH);
             setReadBuff(readBuffer);
         }
         readBuffer.transferFromChannel(getSocketChannel());
@@ -137,7 +139,7 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     public void writePacket(MysqlPacket packet, Encoder<MysqlPacket> encoder) throws IOException {
         MyByteBuff buff = getWriteBuffer();
         if (buff == null) {
-            buff = myByteBuffAllocator.allocate(2);
+            buff = myByteBuffAllocator.allocate(DEFAULT_BUFFER_LENGTH);
         }
         encoder.encode(packet, buff);
         setWriteBuff(buff);
@@ -218,5 +220,13 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
 
     public boolean canRead(){
         return readFlag;
+    }
+
+    public int getPacketScanPos() {
+        return packetScanPos;
+    }
+
+    public void setPacketScanPos(int packetScanPos) {
+        this.packetScanPos = packetScanPos;
     }
 }

@@ -24,7 +24,6 @@ public class BackendComIdleStateHandler extends AbstractComIdleStateHandler {
             byte commandType = (byte) myByteBuff.getFixLenthInteger(4, 1);
             int packetLength = (int) myByteBuff.getFixLenthInteger(0, 3);
             switchState(connection, readableBytes, commandType, packetLength);
-            connection.enableWrite();
         }
     }
 }

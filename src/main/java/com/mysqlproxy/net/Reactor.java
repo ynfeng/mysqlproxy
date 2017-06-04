@@ -58,6 +58,7 @@ public class Reactor {
                     if (c > 0) {
                         Set<SelectionKey> keys = selector.selectedKeys();
                         for (SelectionKey key : keys) {
+                            logger.debug("Reactor线程循环，有"+keys.size()+"个事件。");
                             if (key.isValid()) {
                                 MysqlConnection connection = (MysqlConnection) key.attachment();
                                 connection.drive(null);

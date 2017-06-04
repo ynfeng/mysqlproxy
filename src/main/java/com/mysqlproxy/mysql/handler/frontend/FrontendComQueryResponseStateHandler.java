@@ -25,7 +25,7 @@ public class FrontendComQueryResponseStateHandler implements StateHandler {
         try {
             if (frontendMysqlConnection.getDirectTransferPacketWriteLen() != 0 &&
                     frontendMysqlConnection.isDirectTransferComplete()) {
-
+                frontendMysqlConnection.disableWrite();
             } else {
                 if (!frontendMysqlConnection.canWrite()) {
                     frontendMysqlConnection.enableWrite();
