@@ -10,6 +10,7 @@ import com.mysqlproxy.mysql.protocol.MysqlPacket;
 import com.mysqlproxy.mysql.protocol.OKPacket;
 import com.mysqlproxy.mysql.state.CloseState;
 import com.mysqlproxy.mysql.state.ComIdleState;
+import com.mysqlproxy.mysql.state.ComQueryState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,13 +40,12 @@ public class BackendAuthenticatingStateHandler implements StateHandler {
                 mysqlConnection.getReadBuffer().clear();
                 mysqlConnection.getWriteBuffer().clear();
                 FrontendMysqlConnection frontendMysqlConnection = ((BackendMysqlConnection) mysqlConnection).getFrontendMysqlConnection();
-                if (frontendMysqlConnection != null && !(frontendMysqlConnection.getState() instanceof ComIdleState)) {
-                    mysqlConnection.getReactor().register(frontendMysqlConnection);
-                }
                 //转换到空闲状态
                 mysqlConnection.setState(ComIdleState.INSTANCE);
+                if (frontendMysqlConnection != null && (frontendMysqlConnection.getState() instanceof ComQueryState)) {
+                    frontendMysqlConnection.drive(frontendMysqlConnection.getReadBuffer());
+                }
             } else {
-                //TODO 还有一个切换认证方法的请求未实现
                 mysqlConnection.disableRead();
                 mysqlConnection.setState(CloseState.INSTANCE);
                 mysqlConnection.drive(null);

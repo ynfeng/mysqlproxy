@@ -1,7 +1,9 @@
 package com.mysqlproxy.mysql.handler.frontend;
 
+import com.mysqlproxy.ServerContext;
 import com.mysqlproxy.buffer.MyByteBuff;
 import com.mysqlproxy.mysql.BackendMysqlConnection;
+import com.mysqlproxy.mysql.BackendMysqlConnectionFactory;
 import com.mysqlproxy.mysql.FrontendMysqlConnection;
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.handler.StateHandler;
@@ -35,7 +37,19 @@ public class FrontendComQueryStateHandler implements StateHandler {
                 frontendMysqlConnection.setState(ComQueryResponseState.INSTANCE);
             } else {
                 logger.debug("前端接收COM_QUERY命令");
-                MyByteBuff myByteBuff = frontendMysqlConnection.read();
+                MyByteBuff myByteBuff = (MyByteBuff)o;
+                if(myByteBuff == null){
+                    myByteBuff = frontendMysqlConnection.read();
+                }
+                if(backendMysqlConnection == null){
+                    //TODO 根据sql从后端连接池中取出连接中取出连接
+                    //TODO 如果没有则新建
+                    backendMysqlConnection = BackendMysqlConnectionFactory.INSTANCE.create("10.211.55.5",3306);
+                    backendMysqlConnection.setFrontendMysqlConnection(frontendMysqlConnection);
+                    frontendMysqlConnection.setBackendMysqlConnection(backendMysqlConnection);
+                    ServerContext.getInstance().getConnector().connect(backendMysqlConnection);
+                    return;
+                }
                 if (frontendMysqlConnection.getDirectTransferPacketWriteLen() == 0) {
                     //回收掉后端的写缓冲区，准备与前端共享
                     backendMysqlConnection.recyleWriteBuffer();

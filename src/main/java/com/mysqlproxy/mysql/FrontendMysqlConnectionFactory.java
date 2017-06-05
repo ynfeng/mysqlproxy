@@ -11,10 +11,9 @@ public class FrontendMysqlConnectionFactory {
     private FrontendMysqlConnectionFactory() {
     }
 
-    public FrontendMysqlConnection create(SocketChannel socketChannel, BackendMysqlConnection backendMysqlConnection) {
+    public FrontendMysqlConnection create(SocketChannel socketChannel) {
         FrontendMysqlConnection frontendMysqlConnection =  new FrontendMysqlConnection();
         frontendMysqlConnection.setSocketChannel(socketChannel);
-        frontendMysqlConnection.setBackendMysqlConnection(backendMysqlConnection);
         return frontendMysqlConnection;
     }
 }

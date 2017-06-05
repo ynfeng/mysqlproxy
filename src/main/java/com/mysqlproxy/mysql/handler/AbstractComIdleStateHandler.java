@@ -13,7 +13,7 @@ public abstract class AbstractComIdleStateHandler implements StateHandler {
             if (commandType == CommandType.COM_QUERY) {
                 connection.setDirectTransferPacketLen(packageLength + 4);
                 connection.setState(ComQueryState.INSTANCE);
-                connection.drive(null);
+                connection.drive(connection.getReadBuffer());
             }
         }
     }

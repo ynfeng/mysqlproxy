@@ -57,23 +57,8 @@ public class Acceptor {
                             if (key.isValid() && key.isAcceptable()) {
                                 SocketChannel socketChannel = serverSocketChannel.accept();
                                 socketChannel.configureBlocking(false);
-                                //TODO 还未实现后端连接池,连接池实现后尝试从连接池中取后端连接
-                                BackendMysqlConnection mysqlBackendMysqlConnection = ServerContext.getInstance().getBackendMysqlConnectionFactory().create("10.211.55.5", 3306);
-                                FrontendMysqlConnection frontendMysqlConnection = ServerContext.getInstance().getFrontendMysqlConnectionFactory().create(socketChannel, mysqlBackendMysqlConnection);
-                                mysqlBackendMysqlConnection.setFrontendMysqlConnection(frontendMysqlConnection);
-                                //TODO 如果是从后端连接池中取出的连接，则直接进行前端认证流程
-                                //后端是新建的连接，进行后端的认证流程
-                                ServerContext.getInstance().getConnector().connect(mysqlBackendMysqlConnection);
-//                                /**
-//                                 * 后端连接池中的连接必定属于一个Reactor,所以前端连接使用和后端连接的Reactor
-//                                 * 新建的后端连接没有Reactor,所以前端连接随机注册到一个Reactor,后面后端连接会注册到和前端连接相同的Reactor
-//                                 * 保证前后端连接与同一个Reactor绑定
-//                                 */
-//                                if (mysqlBackendMysqlConnection.getReactor() == null) {
-//                                    ServerContext.getInstance().getMultiReactor().postRegister(frontendMysqlConnection);
-//                                } else {
-//                                    mysqlBackendMysqlConnection.getReactor().register(frontendMysqlConnection);
-//                                }
+                                FrontendMysqlConnection frontendMysqlConnection = ServerContext.getInstance().getFrontendMysqlConnectionFactory().create(socketChannel);
+                                ServerContext.getInstance().getMultiReactor().postRegister(frontendMysqlConnection);
                             }
                         }
                         keys.clear();
