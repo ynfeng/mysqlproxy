@@ -4,7 +4,9 @@ import com.mysqlproxy.buffer.MyByteBuff;
 import com.mysqlproxy.mysql.BackendMysqlConnection;
 import com.mysqlproxy.mysql.FrontendMysqlConnection;
 import com.mysqlproxy.mysql.MysqlConnection;
+import com.mysqlproxy.mysql.codec.ErrorPacketEncoder;
 import com.mysqlproxy.mysql.handler.StateHandler;
+import com.mysqlproxy.mysql.state.ComIdleState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,18 +27,21 @@ public class FrontendComQueryResponseStateHandler implements StateHandler {
         try {
             if (frontendMysqlConnection.getDirectTransferPacketWriteLen() != 0 &&
                     frontendMysqlConnection.isDirectTransferComplete()) {
-                frontendMysqlConnection.disableWrite();
+                frontendMysqlConnection.recyleWriteBuffer();
+                frontendMysqlConnection.recyleReadBuffer();
+                frontendMysqlConnection.setState(ComIdleState.INSTANCE);
+                frontendMysqlConnection.disableWriteAndEnableRead();
             } else {
-                if (!frontendMysqlConnection.canWrite()) {
+                if (!frontendMysqlConnection.isWriteMode()) {
                     frontendMysqlConnection.enableWrite();
                     return;
                 }
                 logger.debug("前端连接向客户端发送COM_QUERY_RESPONSE");
                 MyByteBuff myByteBuff = connection.getWriteBuffer();
+                //TODO 驱动前端状态机
                 frontendMysqlConnection.writeInDirectTransferMode(myByteBuff);
             }
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }

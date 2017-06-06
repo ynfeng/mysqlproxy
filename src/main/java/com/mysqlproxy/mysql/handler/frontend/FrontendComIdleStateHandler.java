@@ -4,6 +4,7 @@ import com.mysqlproxy.buffer.MyByteBuff;
 import com.mysqlproxy.mysql.FrontendMysqlConnection;
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.handler.AbstractComIdleStateHandler;
+import com.mysqlproxy.mysql.state.CloseState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +30,11 @@ public class FrontendComIdleStateHandler extends AbstractComIdleStateHandler {
                 switchState(connection, readableBytes, commandType, packetLength);
             }
         } catch (IOException e) {
-            //TODO 处理异常
+            //TODO 异常处理
             e.printStackTrace();
+            connection.disableRead();
+            connection.setState(CloseState.INSTANCE);
+            connection.drive(null);
         }
 
     }

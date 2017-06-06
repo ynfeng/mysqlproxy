@@ -6,7 +6,9 @@ import com.mysqlproxy.mysql.BackendMysqlConnection;
 import com.mysqlproxy.mysql.BackendMysqlConnectionFactory;
 import com.mysqlproxy.mysql.FrontendMysqlConnection;
 import com.mysqlproxy.mysql.MysqlConnection;
+import com.mysqlproxy.mysql.codec.ErrorPacketEncoder;
 import com.mysqlproxy.mysql.handler.StateHandler;
+import com.mysqlproxy.mysql.protocol.ErrorPacket;
 import com.mysqlproxy.mysql.state.ComQueryResponseState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,14 +39,14 @@ public class FrontendComQueryStateHandler implements StateHandler {
                 frontendMysqlConnection.setState(ComQueryResponseState.INSTANCE);
             } else {
                 logger.debug("前端接收COM_QUERY命令");
-                MyByteBuff myByteBuff = (MyByteBuff)o;
-                if(myByteBuff == null){
+                MyByteBuff myByteBuff = (MyByteBuff) o;
+                if (myByteBuff == null) {
                     myByteBuff = frontendMysqlConnection.read();
                 }
-                if(backendMysqlConnection == null){
+                if (backendMysqlConnection == null) {
                     //TODO 根据sql从后端连接池中取出连接中取出连接
                     //TODO 如果没有则新建
-                    backendMysqlConnection = BackendMysqlConnectionFactory.INSTANCE.create("10.211.55.5",3306);
+                    backendMysqlConnection = BackendMysqlConnectionFactory.INSTANCE.create("10.211.55.5", 3306);
                     backendMysqlConnection.setFrontendMysqlConnection(frontendMysqlConnection);
                     frontendMysqlConnection.setBackendMysqlConnection(backendMysqlConnection);
                     ServerContext.getInstance().getConnector().connect(backendMysqlConnection);
@@ -57,7 +59,7 @@ public class FrontendComQueryStateHandler implements StateHandler {
                 }
                 backendMysqlConnection.drive(null);
             }
-        } catch (IOException e) {
+        } catch (Throwable e) {
             //TODO 处理异常
             e.printStackTrace();
         }

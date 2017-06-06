@@ -214,11 +214,11 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
         this.directTransferPacketWriteLen = directTransferPacketWriteLen;
     }
 
-    public boolean canWrite(){
+    public boolean isWriteMode(){
         return writeFlag;
     }
 
-    public boolean canRead(){
+    public boolean isReadMode(){
         return readFlag;
     }
 

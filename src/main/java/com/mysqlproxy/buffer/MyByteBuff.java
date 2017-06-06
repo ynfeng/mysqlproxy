@@ -131,7 +131,7 @@ public final class MyByteBuff {
                 ensureCapacity(defaultSize);
             }
             if (readed == -1) {
-                return totalRead;
+                throw new IOException("channel closed!");
             } else if (readed == 0) {
                 break;
             }
