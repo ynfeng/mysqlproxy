@@ -33,7 +33,7 @@ public class FrontendInitialStateHandler implements StateHandler {
     public void handle(MysqlConnection mysqlConnection, Object object) {
         logger.debug("向前端响应初始握手包");
         //构建初始握手包
-        String serverVersion = "mysqlproxy 0.0.1";
+        String serverVersion = "mycat2 0.0.1";
         String authPluginName = "mysql_native_password";
         int packageLent = 47 + serverVersion.length() + authPluginName.length();
         int capabilitys = 0;

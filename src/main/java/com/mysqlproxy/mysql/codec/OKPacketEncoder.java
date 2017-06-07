@@ -14,7 +14,7 @@ public class OKPacketEncoder implements Encoder<OKPacket> {
     @Override
     public void encode(OKPacket okPacket, MyByteBuff out) throws IOException {
             out.writeInt(okPacket.payloadLength,3);
-            out.writeInt(okPacket.sequenceId,2);
+            out.writeInt(okPacket.sequenceId,1);
 
             out.writeInt(okPacket.header,1);
             out.writeLenecInt(okPacket.affectedRows,1);
