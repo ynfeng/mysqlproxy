@@ -34,6 +34,8 @@ public class BackendComQueryResponseResultSetRowStateHandler implements StateHan
             backendMysqlConnection.setPacketScanPos(pos);
             if (marker == 0xFE) {
                 logger.debug("后端ResultSetRow包结束标志，进入空闲状态");
+                backendMysqlConnection.setDirectTransferPacketWriteLen(0);
+                backendMysqlConnection.setDirectTransferPacketLen(0);
                 backendMysqlConnection.disableRead();
                 backendMysqlConnection.setState(ComIdleState.INSTANCE);
                 frontendMysqlConnection.recyleWriteBuffer();

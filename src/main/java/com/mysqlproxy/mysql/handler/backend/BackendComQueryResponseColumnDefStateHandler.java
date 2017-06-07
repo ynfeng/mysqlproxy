@@ -35,16 +35,16 @@ public class BackendComQueryResponseColumnDefStateHandler implements StateHandle
                     + columnDefPacketLen; //包内容长度
             backendMysqlConnection.setPacketScanPos(pos);
             if (marker == 0xFE) {
-                logger.debug("后端ColumnDefinition包结束标志，进入下一状态");
+                logger.debug("后端ColumnDefinition包结束标志，进入行数据检查状态");
                 backendMysqlConnection.setState(ComQueryResponseResultSetRowState.INSTANCE);
                 backendMysqlConnection.drive(myByteBuff);
             } else {
                 if (myByteBuff.getReadableBytes() >= pos) {
-                    //依然是完整包
+                    //是完整包，自驱一下
                     backendMysqlConnection.drive(myByteBuff);
                 } else {
                     logger.debug("后端ColumnDefinition包未接收完全，透传");
-                    //不是完整包，透传
+                    //不是完整包，透传一次，等待下次读mysql数据时继续
                     FrontendMysqlConnection frontendMysqlConnection = backendMysqlConnection.getFrontendMysqlConnection();
                     frontendMysqlConnection.recyleWriteBuffer();
                     frontendMysqlConnection.setWriteBuff(myByteBuff);
