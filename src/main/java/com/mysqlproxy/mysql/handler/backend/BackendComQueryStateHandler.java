@@ -29,9 +29,11 @@ public class BackendComQueryStateHandler implements StateHandler {
                 logger.debug("后端向MYSQL发送COM_QUERY包完成，转换至下一状态");
                 backendMysqlConnection.setDirectTransferPacketWriteLen(0);
                 backendMysqlConnection.setDirectTransferPacketLen(0);
-                connection.disableWriteAndEnableRead();
+                backendMysqlConnection.getReadBuffer().clear();
+                backendMysqlConnection.getWriteBuffer().clear();
                 backendMysqlConnection.setState(ComQueryResponseState.INSTANCE);
                 backendMysqlConnection.getFrontendMysqlConnection().drive(null);
+                connection.disableWriteAndEnableRead();
             } else {
                 logger.debug("后端向MYSQL发送COM_QUERY包");
                 if(!backendMysqlConnection.isWriteMode()){

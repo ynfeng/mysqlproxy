@@ -46,7 +46,6 @@ public class BackendComQueryResponseColumnDefStateHandler implements StateHandle
                     logger.debug("后端ColumnDefinition包未接收完全，透传");
                     //不是完整包，透传一次，等待下次读mysql数据时继续
                     FrontendMysqlConnection frontendMysqlConnection = backendMysqlConnection.getFrontendMysqlConnection();
-                    frontendMysqlConnection.recyleWriteBuffer();
                     frontendMysqlConnection.setWriteBuff(myByteBuff);
                     frontendMysqlConnection.setDirectTransferPacketLen(myByteBuff.getReadableBytes());
                     frontendMysqlConnection.drive(null);

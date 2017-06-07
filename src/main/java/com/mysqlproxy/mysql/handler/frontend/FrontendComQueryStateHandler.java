@@ -35,6 +35,7 @@ public class FrontendComQueryStateHandler implements StateHandler {
                 logger.debug("前端COM_QUERY透传完成，转换至下一状态");
                 frontendMysqlConnection.setDirectTransferPacketLen(0);
                 frontendMysqlConnection.setDirectTransferPacketWriteLen(0);
+                frontendMysqlConnection.getReadBuffer().clear();
                 frontendMysqlConnection.disableRead();
                 frontendMysqlConnection.setState(ComQueryResponseState.INSTANCE);
             } else {
@@ -54,7 +55,6 @@ public class FrontendComQueryStateHandler implements StateHandler {
                 }
                 if (frontendMysqlConnection.getDirectTransferPacketWriteLen() == 0) {
                     //回收掉后端的写缓冲区，准备与前端共享
-                    backendMysqlConnection.recyleWriteBuffer();
                     backendMysqlConnection.setWriteBuff(myByteBuff);
                 }
                 backendMysqlConnection.drive(null);

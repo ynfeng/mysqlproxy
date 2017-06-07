@@ -19,7 +19,7 @@ import java.nio.channels.SocketChannel;
  * Created by ynfeng on 2017/5/11.
  */
 public abstract class MysqlConnection<T> implements Connection, StatefulConnection, NIOConnection {
-    private static final int  DEFAULT_BUFFER_LENGTH = 1024 * 1024;
+    private static final int DEFAULT_BUFFER_LENGTH = 1024 * 1024;
     private MysqlConnectionState state;
 
     private SocketChannel socketChannel;
@@ -35,7 +35,6 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     private boolean writeFlag;
     private boolean readFlag;
     private int packetScanPos;
-
 
 
     public void setState(MysqlConnectionState state) {
@@ -156,33 +155,21 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
         return writeBuff;
     }
 
-    public boolean recyleWriteBuffer() {
-        boolean success = false;
-        if (getWriteBuffer() != null) {
-            success = myByteBuffAllocator.recyle(getWriteBuffer());
-            setWriteBuff(null);
-        }
-        return success;
-    }
-
-    public boolean recyleReadBuffer() {
-        boolean success = false;
-        if (getReadBuffer() != null) {
-            success = myByteBuffAllocator.recyle(getReadBuffer());
-            setReadBuff(null);
-        }
-        return success;
-    }
-
     public boolean isDirectTransferComplete() {
         return directTransferPacketLen <= directTransferPacketWriteLen;
     }
 
     public void setReadBuff(MyByteBuff readBuff) {
+        if (this.readBuff != null && this.readBuff != readBuff) {
+            myByteBuffAllocator.recyle(this.readBuff);
+        }
         this.readBuff = readBuff;
     }
 
     public void setWriteBuff(MyByteBuff writeBuff) {
+        if (this.writeBuff != null && this.writeBuff != writeBuff) {
+            myByteBuffAllocator.recyle(this.writeBuff);
+        }
         this.writeBuff = writeBuff;
     }
 
@@ -214,11 +201,11 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
         this.directTransferPacketWriteLen = directTransferPacketWriteLen;
     }
 
-    public boolean isWriteMode(){
+    public boolean isWriteMode() {
         return writeFlag;
     }
 
-    public boolean isReadMode(){
+    public boolean isReadMode() {
         return readFlag;
     }
 
