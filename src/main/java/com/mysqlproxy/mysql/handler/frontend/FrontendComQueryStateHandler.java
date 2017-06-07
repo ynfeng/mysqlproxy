@@ -47,6 +47,7 @@ public class FrontendComQueryStateHandler implements StateHandler {
                 if (backendMysqlConnection == null) {
                     //TODO 根据sql从后端连接池中取出连接中取出连接
                     //TODO 如果没有则新建
+                    logger.debug("收到COM_QUERY命令,准备创建后端连接，或者从连接池中取出连接？？");
                     backendMysqlConnection = BackendMysqlConnectionFactory.INSTANCE.create("10.211.55.5", 3306);
                     backendMysqlConnection.setFrontendMysqlConnection(frontendMysqlConnection);
                     frontendMysqlConnection.setBackendMysqlConnection(backendMysqlConnection);
@@ -54,7 +55,6 @@ public class FrontendComQueryStateHandler implements StateHandler {
                     return;
                 }
                 if (frontendMysqlConnection.getDirectTransferPacketWriteLen() == 0) {
-                    //回收掉后端的写缓冲区，准备与前端共享
                     backendMysqlConnection.setWriteBuff(myByteBuff);
                 }
                 backendMysqlConnection.drive(null);

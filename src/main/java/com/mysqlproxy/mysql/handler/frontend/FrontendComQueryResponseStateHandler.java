@@ -27,6 +27,8 @@ public class FrontendComQueryResponseStateHandler implements StateHandler {
         try {
             if (frontendMysqlConnection.getDirectTransferPacketWriteLen() != 0 &&
                     frontendMysqlConnection.isDirectTransferComplete()) {
+                logger.debug("前端COM_QUERY_RESPONSE完成");
+                logger.debug("释放后端连接？？?");
                 frontendMysqlConnection.getReadBuffer().clear();
                 frontendMysqlConnection.getWriteBuffer().clear();
                 frontendMysqlConnection.setState(ComIdleState.INSTANCE);
