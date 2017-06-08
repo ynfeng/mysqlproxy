@@ -25,23 +25,26 @@ public class BackendComQueryResponseStateHandler implements StateHandler {
     public void handle(MysqlConnection connection, Object o) {
         try {
             logger.info("后端收到COM_QUERY_RESPONSE包");
-            int resultSetPos = 0;
             BackendMysqlConnection backendMysqlConnection = (BackendMysqlConnection) connection;
             FrontendMysqlConnection frontendMysqlConnection = (FrontendMysqlConnection) backendMysqlConnection.getFrontendMysqlConnection();
             MyByteBuff myByteBuff = backendMysqlConnection.read();
             if (myByteBuff.getReadableBytes() >= 5) {
                 int marker = (int) myByteBuff.getFixLenthInteger(4, 1);
                 if (marker == 0xFF) {
-                    //TODO error包
-                    backendMysqlConnection.disableRead();
-                    backendMysqlConnection.getWriteBuffer().clear();
-                    backendMysqlConnection.setState(ComIdleState.INSTANCE);
+                    //error包
+                    int errorPacketLen = (int) myByteBuff.getFixLenthInteger(0, 3);
+                    if (myByteBuff.getReadableBytes() >= errorPacketLen + 4) {
+                        //error包并不大，为了实现简单，如果未收完整，等待接收完整后透传
+                        backendMysqlConnection.disableRead();
+                        backendMysqlConnection.getWriteBuffer().clear();
+                        backendMysqlConnection.setState(ComIdleState.INSTANCE);
 
-                    frontendMysqlConnection.setWriteBuff(myByteBuff);
-                    frontendMysqlConnection.setDirectTransferPacketLen(myByteBuff.getReadableBytes());
-                    frontendMysqlConnection.drive(null);
+                        frontendMysqlConnection.setWriteBuff(myByteBuff);
+                        frontendMysqlConnection.setDirectTransferPacketLen(myByteBuff.getReadableBytes());
+                        frontendMysqlConnection.drive(null);
+                    }
                 } else {
-                    int fieldCountPacketLen = (int) myByteBuff.getFixLenthInteger(resultSetPos, 3);
+                    int fieldCountPacketLen = (int) myByteBuff.getFixLenthInteger(0, 3);
                     if (myByteBuff.getReadableBytes() >= fieldCountPacketLen + 4) {
                         //第一个包完整，进入下一状态
                         connection.setPacketScanPos(fieldCountPacketLen + 4);

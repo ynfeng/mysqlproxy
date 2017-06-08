@@ -43,7 +43,7 @@ public class FrontendComQueryResponseStateHandler implements StateHandler {
                 }
                 logger.debug("前端连接向客户端发送COM_QUERY_RESPONSE");
                 MyByteBuff myByteBuff = connection.getWriteBuffer();
-                //TODO 驱动前端状态机
+
                 frontendMysqlConnection.writeInDirectTransferMode(myByteBuff);
             }
         } catch (IOException e) {
