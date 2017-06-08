@@ -5,6 +5,7 @@ import com.mysqlproxy.mysql.BackendMysqlConnection;
 import com.mysqlproxy.mysql.FrontendMysqlConnection;
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.handler.StateHandler;
+import com.mysqlproxy.mysql.state.ComIdleState;
 import com.mysqlproxy.mysql.state.ComQueryResponseColumnDefState;
 import com.mysqlproxy.mysql.state.ComQueryResponseState;
 import org.slf4j.Logger;
@@ -26,12 +27,19 @@ public class BackendComQueryResponseStateHandler implements StateHandler {
             logger.info("后端收到COM_QUERY_RESPONSE包");
             int resultSetPos = 0;
             BackendMysqlConnection backendMysqlConnection = (BackendMysqlConnection) connection;
+            FrontendMysqlConnection frontendMysqlConnection = (FrontendMysqlConnection) backendMysqlConnection.getFrontendMysqlConnection();
             MyByteBuff myByteBuff = backendMysqlConnection.read();
             if (myByteBuff.getReadableBytes() >= 5) {
                 int marker = (int) myByteBuff.getFixLenthInteger(4, 1);
                 if (marker == 0xFF) {
                     //TODO error包
-                    System.out.println();
+                    backendMysqlConnection.disableRead();
+                    backendMysqlConnection.getWriteBuffer().clear();
+                    backendMysqlConnection.setState(ComIdleState.INSTANCE);
+
+                    frontendMysqlConnection.setWriteBuff(myByteBuff);
+                    frontendMysqlConnection.setDirectTransferPacketLen(myByteBuff.getReadableBytes());
+                    frontendMysqlConnection.drive(null);
                 } else {
                     int fieldCountPacketLen = (int) myByteBuff.getFixLenthInteger(resultSetPos, 3);
                     if (myByteBuff.getReadableBytes() >= fieldCountPacketLen + 4) {
