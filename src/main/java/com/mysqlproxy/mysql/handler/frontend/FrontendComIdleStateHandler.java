@@ -24,7 +24,7 @@ public class FrontendComIdleStateHandler extends AbstractComIdleStateHandler {
             FrontendMysqlConnection frontendMysqlConnection = (FrontendMysqlConnection) connection;
             MyByteBuff myByteBuff = frontendMysqlConnection.read();
             int readableBytes = myByteBuff.getReadableBytes();
-            if (readableBytes >= 4) {
+            if (readableBytes >= 5) {
                 byte commandType = (byte) myByteBuff.getFixLenthInteger(4, 1);
                 int packetLength = (int) myByteBuff.getFixLenthInteger(0, 3);
                 switchState(connection, readableBytes, commandType, packetLength);
