@@ -22,6 +22,9 @@ public class BackendComQueryResponseResultSetRowStateHandler implements StateHan
             logger.debug("后端检查ResultSetRow包");
             BackendMysqlConnection backendMysqlConnection = (BackendMysqlConnection)connection;
             FrontendMysqlConnection frontendMysqlConnection =backendMysqlConnection.getFrontendMysqlConnection();
+            if(myByteBuff == null){
+                myByteBuff = connection.read();
+            }
             int pos = backendMysqlConnection.getPacketScanPos();
             int ResultSetRowPacketLen = (int) myByteBuff.getFixLenthInteger(pos, 3);
             int marker = (int) myByteBuff.getFixLenthInteger(pos + 4, 1);
