@@ -30,11 +30,11 @@ public class BackendComQueryResponseStateHandler implements StateHandler {
             MyByteBuff myByteBuff = backendMysqlConnection.read();
             if (myByteBuff.getReadableBytes() >= 5) {
                 int marker = (int) myByteBuff.getFixLenthInteger(4, 1);
-                if (marker == 0xFF) {
-                    //error包
+                if (marker == 0xFF || marker == 0 || marker == 0xFE) {
+                    //error包或者ok包
                     int errorPacketLen = (int) myByteBuff.getFixLenthInteger(0, 3);
                     if (myByteBuff.getReadableBytes() >= errorPacketLen + 4) {
-                        //error包并不大，为了实现简单，如果未收完整，等待接收完整后透传
+                        //包并不大，为了实现简单，如果未收完整，等待接收完整后透传
                         backendMysqlConnection.disableRead();
                         backendMysqlConnection.getWriteBuffer().clear();
                         backendMysqlConnection.setState(ComIdleState.INSTANCE);

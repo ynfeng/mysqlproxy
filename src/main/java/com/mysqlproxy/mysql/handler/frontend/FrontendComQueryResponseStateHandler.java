@@ -50,7 +50,7 @@ public class FrontendComQueryResponseStateHandler implements StateHandler {
                 if (myByteBuff.getReadableBytes() >= 5) {
                     int marker = (int) myByteBuff.getFixLenthInteger(4, 1);
                     int packetLen = (int) myByteBuff.getFixLenthInteger(0, 3);
-                    if (marker == 0xFF) {
+                    if (marker == 0xFF || marker == 0 || marker == 0xFE) {
                         //error包，直接传给前端，
                         if (!frontendMysqlConnection.isWriteMode()) {
                             frontendMysqlConnection.setDirectTransferPacketLen(packetLen);
