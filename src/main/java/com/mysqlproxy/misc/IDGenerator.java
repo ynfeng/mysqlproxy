@@ -1,4 +1,4 @@
-package com.mysqlproxy.mysql;
+package com.mysqlproxy.misc;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

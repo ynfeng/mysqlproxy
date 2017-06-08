@@ -7,10 +7,6 @@ import com.mysqlproxy.mysql.protocol.InitialHandshakeV10Packet;
 
 /**
  * Created by ynfeng on 2017/5/12.
- * 连接中状态
- * <p>
- * 1.后端,连接成功后等待服务器响应握手包
- * 2.前端,连
  */
 public class ConnectingState implements MysqlConnectionState {
     public static final ConnectingState INSTANCE = new ConnectingState();

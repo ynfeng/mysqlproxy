@@ -2,7 +2,7 @@ package com.mysqlproxy;
 
 import com.mysqlproxy.mysql.BackendMysqlConnectionFactory;
 import com.mysqlproxy.mysql.FrontendMysqlConnectionFactory;
-import com.mysqlproxy.mysql.IDGenerator;
+import com.mysqlproxy.misc.IDGenerator;
 import com.mysqlproxy.mysql.MysqlBackendConnectionPool;
 import com.mysqlproxy.net.Connector;
 import com.mysqlproxy.net.MultiReactor;

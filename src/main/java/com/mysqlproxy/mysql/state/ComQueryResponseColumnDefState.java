@@ -3,6 +3,7 @@ package com.mysqlproxy.mysql.state;
 import com.mysqlproxy.buffer.MyByteBuff;
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.handler.backend.BackendComQueryResponseColumnDefStateHandler;
+import com.mysqlproxy.mysql.handler.frontend.FrontendComQueryResponseColumnDefStateHandler;
 
 public class ComQueryResponseColumnDefState implements MysqlConnectionState {
     public static final ComQueryResponseColumnDefState INSTANCE = new ComQueryResponseColumnDefState();
@@ -17,6 +18,6 @@ public class ComQueryResponseColumnDefState implements MysqlConnectionState {
 
     @Override
     public void frontendHandle(MysqlConnection connection, Object t) {
-
+        FrontendComQueryResponseColumnDefStateHandler.INSTANCE.handle(connection, (MyByteBuff) t);
     }
 }
