@@ -1,5 +1,6 @@
 package com.mysqlproxy.mysql.handler.backend;
 
+import com.mysqlproxy.Constants;
 import com.mysqlproxy.mysql.*;
 import com.mysqlproxy.mysql.codec.InitalHandshakeCodec;
 import com.mysqlproxy.mysql.codec.ResponseHandshakeCodec;
@@ -25,9 +26,8 @@ public class BackendConnectingStateHandler implements StateHandler<InitialHandsh
     public void handle(MysqlConnection mysqlConnection, InitialHandshakeV10Packet packet) {
         logger.debug("后端响应握手包");
         //构建响应包
-        String username = "root";
-        byte[] passwrod = AuthenticationMethodUtil.generateMysqlNativePassword("123456", packet.authPluginDataPart);
-        int packageLength = 35 + username.length() + passwrod.length + packet.authPluginName.length();
+        byte[] passwrod = AuthenticationMethodUtil.generateMysqlNativePassword(Constants.MYSQL_PWD, packet.authPluginDataPart);
+        int packageLength = 35 + Constants.MYSQL_USER.length() + passwrod.length + packet.authPluginName.length();
         byte sequenceId = 1;
         HandshakeResponse41Packet responseHandshake = new HandshakeResponse41Packet(packageLength, sequenceId);
 
@@ -50,7 +50,7 @@ public class BackendConnectingStateHandler implements StateHandler<InitialHandsh
         responseHandshake.capability = capability;
         responseHandshake.maxPacketSize = 16777216;
         responseHandshake.characterSet = CharacterSet.utf8_general_ci;
-        responseHandshake.username = username;
+        responseHandshake.username = Constants.MYSQL_USER;
         responseHandshake.authData = passwrod;
         responseHandshake.authPluginName = packet.authPluginName;
         try {

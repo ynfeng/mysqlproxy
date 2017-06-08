@@ -27,13 +27,19 @@ public class BackendComQueryResponseStateHandler implements StateHandler {
             int resultSetPos = 0;
             BackendMysqlConnection backendMysqlConnection = (BackendMysqlConnection) connection;
             MyByteBuff myByteBuff = backendMysqlConnection.read();
-            if (myByteBuff.getReadableBytes() >= 3) {
-                int fieldCountPacketLen = (int) myByteBuff.getFixLenthInteger(resultSetPos, 3);
-                if (myByteBuff.getReadableBytes() >= fieldCountPacketLen + 4) {
-                    //第一个包完整，进入下一状态
-                    connection.setPacketScanPos(fieldCountPacketLen + 4);
-                    connection.setState(ComQueryResponseColumnDefState.INSTANCE);
-                    connection.drive(myByteBuff);
+            if (myByteBuff.getReadableBytes() >= 5) {
+                int marker = (int) myByteBuff.getFixLenthInteger(4, 1);
+                if (marker == 0xFF) {
+                    //TODO error包
+                    System.out.println();
+                } else {
+                    int fieldCountPacketLen = (int) myByteBuff.getFixLenthInteger(resultSetPos, 3);
+                    if (myByteBuff.getReadableBytes() >= fieldCountPacketLen + 4) {
+                        //第一个包完整，进入下一状态
+                        connection.setPacketScanPos(fieldCountPacketLen + 4);
+                        connection.setState(ComQueryResponseColumnDefState.INSTANCE);
+                        connection.drive(myByteBuff);
+                    }
                 }
             }
         } catch (IOException e) {

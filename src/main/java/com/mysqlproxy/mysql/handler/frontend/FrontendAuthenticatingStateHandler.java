@@ -1,5 +1,6 @@
 package com.mysqlproxy.mysql.handler.frontend;
 
+import com.mysqlproxy.Constants;
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.codec.ErrorPacketEncoder;
 import com.mysqlproxy.mysql.codec.OKPacketEncoder;
@@ -30,7 +31,7 @@ public class FrontendAuthenticatingStateHandler implements StateHandler {
         if (o != null) {
             HandshakeResponse41Packet handshakeResponse41Packet = (HandshakeResponse41Packet) o;
             //TODO 暂时只检查用户名
-            if (handshakeResponse41Packet.username.equals("root")) {
+            if (handshakeResponse41Packet.username.equals(Constants.SERVER_USER)) {
                 logger.debug("前端认证成功");
                 int packetLength = 7;
                 byte sequenceId = 2;
