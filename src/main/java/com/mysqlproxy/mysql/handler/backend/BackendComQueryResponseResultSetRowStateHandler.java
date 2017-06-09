@@ -26,7 +26,7 @@ public class BackendComQueryResponseResultSetRowStateHandler implements StateHan
             }
             for (; ; ) {
                 int pos = backendMysqlConnection.getPacketScanPos();
-                if (myByteBuff.getReadableBytes() > pos + 4) {
+                if (myByteBuff.getReadableBytes() > pos + 5) {
                     int marker = (int) myByteBuff.getFixLenthInteger(pos + 4, 1);
                     if (marker == 0xFE) {
                         logger.debug("后端ResultSetRow包结束标志，写到客户端，并进入空闲状态");

@@ -109,16 +109,19 @@ public final class MyByteBuff {
         int totalWrite = 0;
         long writed;
         byteBufferArray[readBufferArrayIndex].position(readIndex % defaultSize);
-        byteBufferArray[readBufferArrayIndex].limit(writeIndex % defaultSize);
+        byteBufferArray[readBufferArrayIndex].limit(writeIndex / defaultSize > readBufferArrayIndex ? defaultSize : writeIndex - (defaultSize * readBufferArrayIndex));
         while (readIndex < writeIndex) {
             writed = socketChannel.write(byteBufferArray, readBufferArrayIndex, 1);
+            if(writed == 0){
+                break;
+            }
             readIndex += writed;
             totalWrite += writed;
             if (byteBufferArray[readBufferArrayIndex].limit() == byteBufferArray[readBufferArrayIndex].position()
                     && readBufferArrayIndex < writeBufferArrayIndex) {
                 this.readBufferArrayIndex = readBufferArrayIndex + 1;
                 byteBufferArray[readBufferArrayIndex].position(readIndex % defaultSize);
-                byteBufferArray[readBufferArrayIndex].limit(writeIndex % defaultSize);
+                byteBufferArray[readBufferArrayIndex].limit(writeIndex / defaultSize > readBufferArrayIndex ? defaultSize : writeIndex - (defaultSize * readBufferArrayIndex));
             }
         }
         return totalWrite;
@@ -179,7 +182,6 @@ public final class MyByteBuff {
         long rv = 0;
         ByteBuffer[] byteBufferArray = this.byteBufferArray;
         int index = getByteBufferArrayIndex(startPos);
-//        System.out.println("======================"+index+"========"+startPos);
         int offset = getByteBufferOffset(startPos);
         ByteBuffer byteBuffer = byteBufferArray[index];
         for (int i = 0; i < len; i++) {

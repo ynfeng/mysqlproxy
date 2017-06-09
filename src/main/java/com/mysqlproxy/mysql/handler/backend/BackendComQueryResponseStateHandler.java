@@ -24,7 +24,7 @@ public class BackendComQueryResponseStateHandler implements StateHandler {
     @Override
     public void handle(MysqlConnection connection, Object o) {
         try {
-            logger.info("后端收到COM_QUERY_RESPONSE包");
+            logger.debug("后端收到COM_QUERY_RESPONSE包");
             BackendMysqlConnection backendMysqlConnection = (BackendMysqlConnection) connection;
             FrontendMysqlConnection frontendMysqlConnection = (FrontendMysqlConnection) backendMysqlConnection.getFrontendMysqlConnection();
             MyByteBuff myByteBuff = backendMysqlConnection.read();

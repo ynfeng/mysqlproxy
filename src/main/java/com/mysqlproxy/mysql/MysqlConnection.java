@@ -19,7 +19,7 @@ import java.nio.channels.SocketChannel;
  * Created by ynfeng on 2017/5/11.
  */
 public abstract class MysqlConnection<T> implements Connection, StatefulConnection, NIOConnection {
-    private static final int DEFAULT_BUFFER_LENGTH = 1024 * 1024;
+    private static final int DEFAULT_BUFFER_LENGTH = 1024 * 1024 * 16;
     private MysqlConnectionState state;
 
     private SocketChannel socketChannel;
