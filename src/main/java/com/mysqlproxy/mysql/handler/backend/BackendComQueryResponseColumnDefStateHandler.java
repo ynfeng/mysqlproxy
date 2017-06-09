@@ -21,34 +21,41 @@ public class BackendComQueryResponseColumnDefStateHandler implements StateHandle
 
     @Override
     public void handle(MysqlConnection connection, MyByteBuff myByteBuff) {
-        logger.debug("后端检查ColumnDefinition包");
         BackendMysqlConnection backendMysqlConnection = (BackendMysqlConnection) connection;
         try {
             if (myByteBuff == null) {
                 myByteBuff = connection.read();
             }
-            int pos = backendMysqlConnection.getPacketScanPos();
-            int columnDefPacketLen = (int) myByteBuff.getFixLenthInteger(pos, 3);
-            int marker = (int) myByteBuff.getFixLenthInteger(pos + 4, 1);
-            pos = pos
-                    + 4 //包头
-                    + columnDefPacketLen; //包内容长度
-            backendMysqlConnection.setPacketScanPos(pos);
-            if (marker == 0xFE) {
-                logger.debug("后端ColumnDefinition包结束标志，进入行数据检查状态");
-                backendMysqlConnection.setState(ComQueryResponseResultSetRowState.INSTANCE);
-                backendMysqlConnection.drive(myByteBuff);
-            } else {
-                if (myByteBuff.getReadableBytes() >= pos) {
-                    //是完整包，自驱一下
-                    backendMysqlConnection.drive(myByteBuff);
-                } else {
-                    logger.debug("后端ColumnDefinition包未接收完全，透传");
-                    //不是完整包，透传一次，等待下次读mysql数据时继续
-                    FrontendMysqlConnection frontendMysqlConnection = backendMysqlConnection.getFrontendMysqlConnection();
-                    frontendMysqlConnection.setWriteBuff(myByteBuff);
-                    frontendMysqlConnection.setDirectTransferPacketLen(myByteBuff.getReadableBytes());
-                    frontendMysqlConnection.drive(null);
+            for (; ; ) {
+                int pos = backendMysqlConnection.getPacketScanPos();
+                if (myByteBuff.getReadableBytes() > pos + 4) {
+                    int marker = (int) myByteBuff.getFixLenthInteger(pos + 4, 1);
+                    if (marker == 0xFE) {
+                        logger.debug("后端ColumnDefinition包结束标志，进入行数据检查状态");
+                        int columnDefPacketLen = (int) myByteBuff.getFixLenthInteger(pos, 3);
+                        pos = pos
+                                + 4 //包头
+                                + columnDefPacketLen; //包内容长度
+                        backendMysqlConnection.setPacketScanPos(pos);
+                        backendMysqlConnection.setState(ComQueryResponseResultSetRowState.INSTANCE);
+                        backendMysqlConnection.drive(myByteBuff);
+                        break;
+                    } else {
+                        logger.debug("后端检查ColumnDefinition包");
+                        int columnDefPacketLen = (int) myByteBuff.getFixLenthInteger(pos, 3);
+                        pos = pos
+                                + 4 //包头
+                                + columnDefPacketLen; //包内容长度
+                        backendMysqlConnection.setPacketScanPos(pos);
+                        if (myByteBuff.getReadableBytes() < pos) {
+                            logger.debug("后端ColumnDefinition包未接收完全，透传");
+                            //不是完整包，透传一次，等待下次读mysql数据时继续
+                            FrontendMysqlConnection frontendMysqlConnection = backendMysqlConnection.getFrontendMysqlConnection();
+                            frontendMysqlConnection.setWriteBuff(myByteBuff);
+                            frontendMysqlConnection.setDirectTransferPacketLen(myByteBuff.getReadableBytes());
+                            frontendMysqlConnection.drive(null);
+                        }
+                    }
                 }
             }
         } catch (IOException e) {

@@ -108,7 +108,8 @@ public final class MyByteBuff {
     public int transferToChannel(SocketChannel socketChannel) throws IOException {
         int totalWrite = 0;
         long writed;
-        byteBufferArray[readBufferArrayIndex].flip();
+        byteBufferArray[readBufferArrayIndex].position(readIndex % defaultSize);
+        byteBufferArray[readBufferArrayIndex].limit(writeIndex % defaultSize);
         while (readIndex < writeIndex) {
             writed = socketChannel.write(byteBufferArray, readBufferArrayIndex, 1);
             readIndex += writed;
@@ -116,7 +117,8 @@ public final class MyByteBuff {
             if (byteBufferArray[readBufferArrayIndex].limit() == byteBufferArray[readBufferArrayIndex].position()
                     && readBufferArrayIndex < writeBufferArrayIndex) {
                 this.readBufferArrayIndex = readBufferArrayIndex + 1;
-                byteBufferArray[readBufferArrayIndex].flip();
+                byteBufferArray[readBufferArrayIndex].position(readIndex % defaultSize);
+                byteBufferArray[readBufferArrayIndex].limit(writeIndex % defaultSize);
             }
         }
         return totalWrite;
@@ -124,6 +126,8 @@ public final class MyByteBuff {
 
     public int transferFromChannel(SocketChannel socketChannel) throws IOException {
         int totalRead = 0;
+        byteBufferArray[writeBufferArrayIndex].position(writeIndex % defaultSize);
+        byteBufferArray[writeBufferArrayIndex].limit(defaultSize);
         long readed = socketChannel.read(byteBufferArray, writeBufferArrayIndex, 1);
         for (; ; ) {
             this.freeBytes -= readed;
@@ -139,6 +143,8 @@ public final class MyByteBuff {
             totalRead += readed;
             if (byteBufferArray[writeBufferArrayIndex].capacity() == byteBufferArray[writeBufferArrayIndex].position()) {
                 this.writeBufferArrayIndex = ++writeBufferArrayIndex;
+                byteBufferArray[writeBufferArrayIndex].position(writeIndex % defaultSize);
+                byteBufferArray[writeBufferArrayIndex].limit(defaultSize);
             }
             readed = socketChannel.read(byteBufferArray, writeBufferArrayIndex, 1);
         }
@@ -173,6 +179,7 @@ public final class MyByteBuff {
         long rv = 0;
         ByteBuffer[] byteBufferArray = this.byteBufferArray;
         int index = getByteBufferArrayIndex(startPos);
+//        System.out.println("======================"+index+"========"+startPos);
         int offset = getByteBufferOffset(startPos);
         ByteBuffer byteBuffer = byteBufferArray[index];
         for (int i = 0; i < len; i++) {
