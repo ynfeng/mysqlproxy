@@ -1,5 +1,6 @@
 package com.mysqlproxy.net;
 
+import com.mysqlproxy.Constants;
 import com.mysqlproxy.ServerContext;
 import com.mysqlproxy.mysql.BackendMysqlConnection;
 import com.mysqlproxy.mysql.FrontendMysqlConnection;
@@ -26,7 +27,7 @@ public class Acceptor {
 
     public Acceptor() {
         try {
-            serverSocketChannel = ServerSocketChannel.open().bind(new InetSocketAddress(3306));
+            serverSocketChannel = ServerSocketChannel.open().bind(new InetSocketAddress(Constants.SERVER_PORT));
             serverSocketChannel.configureBlocking(false);
             selector = Selector.open();
             selectionKey = serverSocketChannel.register(selector, 0);
@@ -36,7 +37,7 @@ public class Acceptor {
     }
 
     public void startup() {
-        logger.info("服务器启动，监听端口3306");
+        logger.info("服务器启动，监听端口" + Constants.SERVER_PORT);
         selectionKey.interestOps(SelectionKey.OP_ACCEPT);
         new AcceptorThread().start();
     }
