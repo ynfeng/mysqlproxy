@@ -10,6 +10,7 @@ public class HandshakeResponse41Packet extends MysqlPacket {
     public String username;
     public byte[] authData;
     public String authPluginName;
+    public String schema;
 
 
 

@@ -57,7 +57,8 @@ public class FrontendInitialStateHandler implements StateHandler {
         capabilitys |= CapabilityFlags.CLIENT_MULTI_STATEMENTS;
         capabilitys |= CapabilityFlags.CLIENT_MULTI_RESULTS;
         capabilitys |= CapabilityFlags.CLIENT_PLUGIN_AUTH;
-//        capabilitys |= CapabilityFlags.CLIENT_CONNECT_ATTRS;
+        capabilitys |= CapabilityFlags.CLIENT_CONNECT_ATTRS;
+        capabilitys |= CapabilityFlags.CLIENT_PS_MULTI_RESULTS;
         capabilitys |= CapabilityFlags.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA;
         capabilitys |= CapabilityFlags.CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS;
         capabilitys |= CapabilityFlags.UNUSED;

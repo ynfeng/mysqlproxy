@@ -1,6 +1,7 @@
 package com.mysqlproxy.mysql.codec;
 
 import com.mysqlproxy.buffer.MyByteBuff;
+import com.mysqlproxy.mysql.protocol.CapabilityFlags;
 import com.mysqlproxy.mysql.protocol.HandshakeResponse41Packet;
 import com.mysqlproxy.mysql.protocol.MysqlPacket;
 
@@ -32,7 +33,12 @@ public class ResponseHandshakeCodec implements Decoder<MysqlPacket>, Encoder<Mys
             handshakeResponse41Packet.username = buff.readNulTerminatedString();
             int lengthOfAuth = (int) buff.readLenenc();
             handshakeResponse41Packet.authData = buff.readBytes(lengthOfAuth);
-            handshakeResponse41Packet.authPluginName = buff.readNulTerminatedString();
+            if((handshakeResponse41Packet.capability & CapabilityFlags.CLIENT_CONNECT_WITH_DB) != 0){
+                handshakeResponse41Packet.schema =  buff.readNulTerminatedString();
+            }
+            if((handshakeResponse41Packet.capability & CapabilityFlags.CLIENT_PLUGIN_AUTH) != 0){
+                handshakeResponse41Packet.authPluginName = buff.readNulTerminatedString();
+            }
             return handshakeResponse41Packet;
         }
         return null;
