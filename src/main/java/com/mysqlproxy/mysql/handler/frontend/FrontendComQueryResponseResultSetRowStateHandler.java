@@ -24,60 +24,61 @@ public class FrontendComQueryResponseResultSetRowStateHandler implements StateHa
             logger.debug("前端检查ResultSetRow包");
             FrontendMysqlConnection frontendMysqlConnection = (FrontendMysqlConnection) connection;
             BackendMysqlConnection backendMysqlConnection = (BackendMysqlConnection) frontendMysqlConnection.getBackendMysqlConnection();
-            if (frontendMysqlConnection.getDirectTransferPacketWriteLen() != 0 &&
-                    frontendMysqlConnection.isDirectTransferComplete()) {
-                if (backendMysqlConnection.getState() instanceof ComIdleState) {
-                    logger.debug("前端ResultSetRow,响应完毕,进入空闲状态");
-                    logger.debug("释放后端连接？？?");
-                    frontendMysqlConnection.getReadBuffer().clear();
-                    frontendMysqlConnection.getWriteBuffer().clear();
-                    frontendMysqlConnection.setState(ComIdleState.INSTANCE);
-                    frontendMysqlConnection.setDirectTransferPacketLen(0);
-                    frontendMysqlConnection.setDirectTransferPacketWriteLen(0);
-                    frontendMysqlConnection.setPacketScanPos(0);
-                    frontendMysqlConnection.disableWriteAndEnableRead();
+            if (myByteBuff == null) {
+                myByteBuff = frontendMysqlConnection.getWriteBuffer();
+            }
+            for (; ; ) {
+                int pos = frontendMysqlConnection.getPacketScanPos();
+                if (myByteBuff.getWriteIndex() < pos + 5) {
+                    break;
+                }
+                int marker = (int) myByteBuff.getFixLenthInteger(pos + 4, 1);
+                if (marker == 0xFE) {
+                    logger.debug("前端ResultSetRow包结束标志，传到客户端，并进入空闲状态");
+                    if (!frontendMysqlConnection.isWriteMode()) {
+                        frontendMysqlConnection.setDirectTransferPacketLen(myByteBuff.getReadableBytes());
+                        frontendMysqlConnection.enableWrite();
+                        return;
+                    }
+                    frontendMysqlConnection.writeInDirectTransferMode(myByteBuff);
+                    if (frontendMysqlConnection.isDirectTransferComplete()) {
+                        if (backendMysqlConnection.getState() instanceof ComIdleState) {
+                            logger.debug("前端ResultSetRow,响应完毕,进入空闲状态");
+                            logger.debug("释放后端连接？？?");
+                            frontendMysqlConnection.getReadBuffer().clear();
+                            frontendMysqlConnection.getWriteBuffer().clear();
+                            frontendMysqlConnection.setState(ComIdleState.INSTANCE);
+                            frontendMysqlConnection.setDirectTransferPacketLen(0);
+                            frontendMysqlConnection.setDirectTransferPacketWriteLen(0);
+                            frontendMysqlConnection.setPacketScanPos(0);
+                            frontendMysqlConnection.disableWriteAndEnableRead();
+                        }
+                    }
+                    break;
                 } else {
-                    //部分包写完了，等待后端数据
-                    logger.debug("前端ResultSetRow,部分包写完，等待后端数据");
-                    frontendMysqlConnection.disableWrite();
-                    frontendMysqlConnection.setDirectTransferPacketLen(0);
-                    frontendMysqlConnection.setDirectTransferPacketWriteLen(0);
-                }
-            } else {
-                if (myByteBuff == null) {
-                    myByteBuff = frontendMysqlConnection.getWriteBuffer();
-                }
-                for (; ; ) {
-                    int pos = frontendMysqlConnection.getPacketScanPos();
-
-                    int marker = (int) myByteBuff.getFixLenthInteger(pos + 4, 1);
-                    if (marker == 0xFE) {
-                        logger.debug("前端ResultSetRow包结束标志，传到客户端，并进入空闲状态");
+                    logger.debug("前端检查ResultSetRow包");
+                    int ResultSetRowPacketLen = (int) myByteBuff.getFixLenthInteger(pos, 3);
+                    pos = pos
+                            + 4 //包头
+                            + ResultSetRowPacketLen; //包内容长度
+                    frontendMysqlConnection.setPacketScanPos(pos);
+                    if (myByteBuff.getWriteIndex() < pos) {
+                        //不是完整包，透传一次，等待后端数据
                         if (!frontendMysqlConnection.isWriteMode()) {
                             frontendMysqlConnection.setDirectTransferPacketLen(myByteBuff.getReadableBytes());
                             frontendMysqlConnection.enableWrite();
                             return;
                         }
+                        logger.debug("前端ResultSetRow不是完整包，传到客户端");
                         frontendMysqlConnection.writeInDirectTransferMode(myByteBuff);
-                        break;
-                    } else {
-                        logger.debug("前端检查ResultSetRow包");
-                        int ResultSetRowPacketLen = (int) myByteBuff.getFixLenthInteger(pos, 3);
-                        pos = pos
-                                + 4 //包头
-                                + ResultSetRowPacketLen; //包内容长度
-                        frontendMysqlConnection.setPacketScanPos(pos);
-                        if (myByteBuff.getReadableBytes() < pos) {
-                            //不是完整包，透传一次，等待后端数据
-                            if (!frontendMysqlConnection.isWriteMode()) {
-                                frontendMysqlConnection.setDirectTransferPacketLen(myByteBuff.getReadableBytes());
-                                frontendMysqlConnection.enableWrite();
-                                return;
-                            }
-                            logger.debug("前端ResultSetRow不是完整包，传到客户端");
-                            frontendMysqlConnection.writeInDirectTransferMode(myByteBuff);
-                            break;
+                        if (frontendMysqlConnection.isDirectTransferComplete()) {
+                            //部分包写完了，等待后端数据
+                            logger.debug("前端ResultSetRow,部分包写完，等待后端数据");
+                            frontendMysqlConnection.disableWrite();
+                            frontendMysqlConnection.setDirectTransferPacketLen(0);
+                            frontendMysqlConnection.setDirectTransferPacketWriteLen(0);
                         }
+                        break;
                     }
                 }
             }

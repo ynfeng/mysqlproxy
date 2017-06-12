@@ -413,4 +413,28 @@ public final class MyByteBuff {
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
+
+    public int getWriteIndex() {
+        return writeIndex;
+    }
+
+    public void setWriteIndex(int writeIndex) {
+        this.writeIndex = writeIndex;
+    }
+
+    public int getReadIndex() {
+        return readIndex;
+    }
+
+    public void setReadIndex(int readIndex) {
+        this.readIndex = readIndex;
+    }
+
+    public int getFreeBytes() {
+        return freeBytes;
+    }
+
+    public void setFreeBytes(int freeBytes) {
+        this.freeBytes = freeBytes;
+    }
 }

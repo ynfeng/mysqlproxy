@@ -26,7 +26,7 @@ public class BackendComQueryResponseResultSetRowStateHandler implements StateHan
             }
             for (; ; ) {
                 int pos = backendMysqlConnection.getPacketScanPos();
-                if (myByteBuff.getReadableBytes() > pos + 5) {
+                if (myByteBuff.getWriteIndex() > pos + 5) {
                     int marker = (int) myByteBuff.getFixLenthInteger(pos + 4, 1);
                     if (marker == 0xFE) {
                         logger.debug("后端ResultSetRow包结束标志，写到客户端，并进入空闲状态");
@@ -44,12 +44,11 @@ public class BackendComQueryResponseResultSetRowStateHandler implements StateHan
                                 + 4 //包头
                                 + resultSetRowPacketLen; //包内容长度
                         backendMysqlConnection.setPacketScanPos(pos);
-                        if (myByteBuff.getReadableBytes() <= pos) {
+                        if (myByteBuff.getWriteIndex() <= pos) {
                             //不是完整包，透传一次，等待下次读mysql数据时继续
                             logger.debug("后端ResultSetRow不是完整包，透传");
-//                        frontendMysqlConnection.setWriteBuff(myByteBuff);
-//                        frontendMysqlConnection.setDirectTransferPacketLen(myByteBuff.getReadableBytes());
-//                        frontendMysqlConnection.drive(null);
+                            frontendMysqlConnection.setWriteBuff(myByteBuff);
+                            frontendMysqlConnection.drive(null);
                             break;
                         }
                     }
