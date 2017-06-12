@@ -33,7 +33,7 @@ public class FrontendInitialStateHandler implements StateHandler {
     public void handle(MysqlConnection mysqlConnection, Object object) {
         logger.debug("向前端响应初始握手包");
         //构建初始握手包
-        String serverVersion = "mycat2 0.0.1";
+        String serverVersion = "5.6.36";
         String authPluginName = "mysql_native_password";
         int packageLent = 47 + serverVersion.length() + authPluginName.length();
         int capabilitys = 0;
@@ -57,7 +57,7 @@ public class FrontendInitialStateHandler implements StateHandler {
         capabilitys |= CapabilityFlags.CLIENT_MULTI_STATEMENTS;
         capabilitys |= CapabilityFlags.CLIENT_MULTI_RESULTS;
         capabilitys |= CapabilityFlags.CLIENT_PLUGIN_AUTH;
-        capabilitys |= CapabilityFlags.CLIENT_CONNECT_ATTRS;
+//        capabilitys |= CapabilityFlags.CLIENT_CONNECT_ATTRS;
         capabilitys |= CapabilityFlags.CLIENT_PS_MULTI_RESULTS;
         capabilitys |= CapabilityFlags.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA;
         capabilitys |= CapabilityFlags.CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS;
