@@ -1,7 +1,5 @@
 package com.mysqlproxy;
 
-import com.mysqlproxy.mysql.BackendMysqlConnection;
-import com.mysqlproxy.mysql.BackendMysqlConnectionFactory;
 import com.mysqlproxy.net.Acceptor;
 import com.mysqlproxy.net.Connector;
 import com.mysqlproxy.net.MultiReactor;
