@@ -29,6 +29,8 @@ public class FrontendResponseHandshakeStateHandler implements StateHandler {
             MysqlPacket mysqlPacket = mysqlConnection.readPacket(ResponseHandshakeCodec.INSTANCE);
             if (mysqlPacket != null) {
                 if (mysqlPacket instanceof HandshakeResponse41Packet) {
+                    HandshakeResponse41Packet handshakeResponse41Packet = (HandshakeResponse41Packet)mysqlPacket;
+                    mysqlConnection.setSchema(handshakeResponse41Packet.schema);
                     mysqlConnection.disableRead();
                     mysqlConnection.setState(AuthenticatingState.INSTANCE);
                     mysqlConnection.drive(mysqlPacket);

@@ -42,7 +42,7 @@ public class BackendAuthenticatingStateHandler implements StateHandler {
                 FrontendMysqlConnection frontendMysqlConnection = ((BackendMysqlConnection) mysqlConnection).getFrontendMysqlConnection();
                 //转换到空闲状态
                 mysqlConnection.setState(ComIdleState.INSTANCE);
-                if (frontendMysqlConnection != null && (frontendMysqlConnection.getState() instanceof ComQueryState)) {
+                if (frontendMysqlConnection != null && (frontendMysqlConnection.getState() instanceof ComIdleState)) {
                     frontendMysqlConnection.drive(frontendMysqlConnection.getReadBuffer());
                 }
             } else {

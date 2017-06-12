@@ -4,6 +4,8 @@ import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 public class JDBCTest {
 
@@ -15,7 +17,11 @@ public class JDBCTest {
             String username = "root";
             String password = "123456";
             Connection con = DriverManager.getConnection(url, username, password);
-            System.out.println();
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("select  * from t_ynfeng");
+            while(rs.next()){
+                System.out.println(rs.getString(2));
+            }
         } catch (Exception e){
             e.printStackTrace();
         }

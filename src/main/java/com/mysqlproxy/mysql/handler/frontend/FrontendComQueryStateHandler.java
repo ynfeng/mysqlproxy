@@ -45,16 +45,6 @@ public class FrontendComQueryStateHandler implements StateHandler {
                 if (myByteBuff == null) {
                     myByteBuff = frontendMysqlConnection.read();
                 }
-                if (backendMysqlConnection == null) {
-                    //TODO 根据sql从后端连接池中取出连接中取出连接
-                    //TODO 如果没有则新建
-                    logger.debug("收到COM_QUERY命令,准备创建后端连接，或者从连接池中取出连接？？");
-                    backendMysqlConnection = BackendMysqlConnectionFactory.INSTANCE.create(Constants.MYSQL_SERVER_IP, Constants.MYSQL_SERVER_PORT);
-                    backendMysqlConnection.setFrontendMysqlConnection(frontendMysqlConnection);
-                    frontendMysqlConnection.setBackendMysqlConnection(backendMysqlConnection);
-                    ServerContext.getInstance().getConnector().connect(backendMysqlConnection);
-                    return;
-                }
                 if (frontendMysqlConnection.getDirectTransferPacketWriteLen() == 0) {
                     backendMysqlConnection.setWriteBuff(myByteBuff);
                 }

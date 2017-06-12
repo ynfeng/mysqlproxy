@@ -25,10 +25,14 @@ public class BackendConnectingStateHandler implements StateHandler<InitialHandsh
     @Override
     public void handle(MysqlConnection mysqlConnection, InitialHandshakeV10Packet packet) {
         logger.debug("后端响应握手包");
+        FrontendMysqlConnection frontendMysqlConnection = ((BackendMysqlConnection) mysqlConnection).getFrontendMysqlConnection();
         //构建响应包
         byte[] passwrod = AuthenticationMethodUtil.generateMysqlNativePassword(Constants.MYSQL_PWD, packet.authPluginDataPart);
         int packageLength = 35 + Constants.MYSQL_USER.length() + passwrod.length + packet.authPluginName.length();
         byte sequenceId = 1;
+        if (frontendMysqlConnection != null && frontendMysqlConnection.getSchema() != null) {
+            packageLength += frontendMysqlConnection.getSchema().length() + 1;
+        }
         HandshakeResponse41Packet responseHandshake = new HandshakeResponse41Packet(packageLength, sequenceId);
 
         int capability = 0;
@@ -46,6 +50,9 @@ public class BackendConnectingStateHandler implements StateHandler<InitialHandsh
         capability |= CapabilityFlags.CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS;
         capability |= CapabilityFlags.CLIENT_SESSION_TRACK;
         capability |= CapabilityFlags.CLIENT_DEPRECATE_EOF;
+        if (frontendMysqlConnection != null && frontendMysqlConnection.getSchema() != null) {
+            capability |= CapabilityFlags.CLIENT_CONNECT_WITH_DB;
+        }
 
         responseHandshake.capability = capability;
         responseHandshake.maxPacketSize = 16777216;
@@ -53,6 +60,8 @@ public class BackendConnectingStateHandler implements StateHandler<InitialHandsh
         responseHandshake.username = Constants.MYSQL_USER;
         responseHandshake.authData = passwrod;
         responseHandshake.authPluginName = packet.authPluginName;
+        responseHandshake.schema = frontendMysqlConnection.getSchema();
+
         try {
             mysqlConnection.setState(RespondHandshakeState.INSTANCE);
             mysqlConnection.writePacket(responseHandshake, ResponseHandshakeCodec.INSTANCE);

@@ -33,10 +33,10 @@ public class ResponseHandshakeCodec implements Decoder<MysqlPacket>, Encoder<Mys
             handshakeResponse41Packet.username = buff.readNulTerminatedString();
             int lengthOfAuth = (int) buff.readLenenc();
             handshakeResponse41Packet.authData = buff.readBytes(lengthOfAuth);
-            if((handshakeResponse41Packet.capability & CapabilityFlags.CLIENT_CONNECT_WITH_DB) != 0){
-                handshakeResponse41Packet.schema =  buff.readNulTerminatedString();
+            if ((handshakeResponse41Packet.capability & CapabilityFlags.CLIENT_CONNECT_WITH_DB) != 0) {
+                handshakeResponse41Packet.schema = buff.readNulTerminatedString();
             }
-            if((handshakeResponse41Packet.capability & CapabilityFlags.CLIENT_PLUGIN_AUTH) != 0){
+            if ((handshakeResponse41Packet.capability & CapabilityFlags.CLIENT_PLUGIN_AUTH) != 0) {
                 handshakeResponse41Packet.authPluginName = buff.readNulTerminatedString();
             }
             return handshakeResponse41Packet;
@@ -57,6 +57,9 @@ public class ResponseHandshakeCodec implements Decoder<MysqlPacket>, Encoder<Mys
         out.writeInt(0, 7);
         out.writeString(handshakeResponse41Packet.username);
         out.writeLenencBytes(handshakeResponse41Packet.authData);
+        if ((handshakeResponse41Packet.capability & CapabilityFlags.CLIENT_CONNECT_WITH_DB) != 0) {
+            out.writeString(handshakeResponse41Packet.schema);
+        }
         out.writeString(handshakeResponse41Packet.authPluginName);
     }
 }

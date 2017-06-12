@@ -35,6 +35,7 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
     private boolean writeFlag;
     private boolean readFlag;
     private int packetScanPos;
+    private String schema;
 
 
     public void setState(MysqlConnectionState state) {
@@ -215,5 +216,13 @@ public abstract class MysqlConnection<T> implements Connection, StatefulConnecti
 
     public void setPacketScanPos(int packetScanPos) {
         this.packetScanPos = packetScanPos;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
     }
 }
