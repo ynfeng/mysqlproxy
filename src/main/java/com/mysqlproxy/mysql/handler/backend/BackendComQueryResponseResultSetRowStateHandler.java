@@ -53,7 +53,6 @@ public class BackendComQueryResponseResultSetRowStateHandler implements StateHan
                         }
                     }
                 } else {
-                    System.out.println();
                     break;
                 }
             }
