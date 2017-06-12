@@ -8,6 +8,6 @@
 * 运行com.mysqlproxy.ServerBootstrap启动服务器。
 * 使用mysql client或JDBC连接
 * 部分mysql客户端可能不支持，因为有些命令没有实现
-
+* debug级别的日志对性能有很大影响，性能测试关闭debug日志
 
 
