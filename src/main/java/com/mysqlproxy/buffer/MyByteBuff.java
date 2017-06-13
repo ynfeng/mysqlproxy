@@ -112,7 +112,7 @@ public final class MyByteBuff {
         byteBufferArray[readBufferArrayIndex].limit(writeIndex / defaultSize > readBufferArrayIndex ? defaultSize : writeIndex - (defaultSize * readBufferArrayIndex));
         while (readIndex < writeIndex) {
             writed = socketChannel.write(byteBufferArray, readBufferArrayIndex, 1);
-            if(writed == 0){
+            if (writed == 0) {
                 break;
             }
             readIndex += writed;
@@ -137,9 +137,12 @@ public final class MyByteBuff {
             if (freeBytes == 0) {
                 ensureCapacity(defaultSize);
             }
-            if (readed == -1) {
+            if (readed == -1 && totalRead == 0) {
                 throw new IOException("channel closed!");
-            } else if (readed == 0) {
+            } else if(readed == -1 && totalRead != 0){
+                return totalRead;
+            }
+            if (readed == 0) {
                 break;
             }
             writeIndex += readed;

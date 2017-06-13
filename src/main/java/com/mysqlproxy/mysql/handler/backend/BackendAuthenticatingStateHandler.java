@@ -29,26 +29,29 @@ public class BackendAuthenticatingStateHandler implements StateHandler {
     public void handle(MysqlConnection mysqlConnection, Object o) {
         try {
             MysqlPacket mysqlPacket = mysqlConnection.readPacket(AuthenticateCodec.INSTANCE);
+            BackendMysqlConnection backendMysqlConnection = (BackendMysqlConnection)mysqlConnection;
+            FrontendMysqlConnection frontendMysqlConnection = backendMysqlConnection.getFrontendMysqlConnection();
             if (mysqlPacket instanceof ErrorPacket) {
                 logger.debug("后端接收Mysql认证响应结果,Error包");
-                mysqlConnection.disableRead();
-                mysqlConnection.setState(CloseState.INSTANCE);
-                mysqlConnection.drive(null);
+                backendMysqlConnection.disableRead();
+                backendMysqlConnection.setState(CloseState.INSTANCE);
+                backendMysqlConnection.drive(null);
+
+                frontendMysqlConnection.drive(mysqlPacket);
             } else if (mysqlPacket instanceof OKPacket) {
                 logger.debug("后端接收Mysql认证响应结果,OK包");
                 //认证成功，清空所有缓冲区
-                mysqlConnection.getReadBuffer().clear();
-                mysqlConnection.getWriteBuffer().clear();
-                FrontendMysqlConnection frontendMysqlConnection = ((BackendMysqlConnection) mysqlConnection).getFrontendMysqlConnection();
+                backendMysqlConnection.getReadBuffer().clear();
+                backendMysqlConnection.getWriteBuffer().clear();
                 //转换到空闲状态
-                mysqlConnection.setState(ComIdleState.INSTANCE);
+                backendMysqlConnection.setState(ComIdleState.INSTANCE);
                 if (frontendMysqlConnection != null && (frontendMysqlConnection.getState() instanceof ComIdleState)) {
                     frontendMysqlConnection.drive(frontendMysqlConnection.getReadBuffer());
                 }
             } else {
-                mysqlConnection.disableRead();
-                mysqlConnection.setState(CloseState.INSTANCE);
-                mysqlConnection.drive(null);
+                backendMysqlConnection.disableRead();
+                backendMysqlConnection.setState(CloseState.INSTANCE);
+                backendMysqlConnection.drive(null);
             }
         } catch (Exception e) {
             e.printStackTrace();

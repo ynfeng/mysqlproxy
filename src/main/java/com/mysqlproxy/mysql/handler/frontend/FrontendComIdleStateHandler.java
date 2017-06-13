@@ -9,6 +9,7 @@ import com.mysqlproxy.mysql.FrontendMysqlConnection;
 import com.mysqlproxy.mysql.MysqlConnection;
 import com.mysqlproxy.mysql.handler.AbstractComIdleStateHandler;
 import com.mysqlproxy.mysql.state.CloseState;
+import com.mysqlproxy.mysql.state.FinalState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,14 @@ public class FrontendComIdleStateHandler extends AbstractComIdleStateHandler {
                     ServerContext.getInstance().getConnector().connect(backendMysqlConnection);
                     return;
                 }
+                if (backendMysqlConnection != null &&
+                        (backendMysqlConnection.getState() instanceof CloseState ||
+                                backendMysqlConnection.getState() instanceof FinalState)) {
+                    frontendMysqlConnection.setState(CloseState.INSTANCE);
+                    frontendMysqlConnection.drive(o);
+                    return;
+                }
+
                 switchState(connection, readableBytes, commandType, packetLength);
             }
         } catch (IOException e) {
