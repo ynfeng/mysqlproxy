@@ -1,4 +1,5 @@
 # mysqlproxy
+仅供技术研究使用
 
 * 支持基本的crud
 * 支持use xxx
